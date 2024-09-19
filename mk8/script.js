@@ -385,8 +385,8 @@ tweetButton.addEventListener("click", function() {
   const vehicle = document.getElementById("vehicle").textContent;
   const wheel = document.getElementById("wheel").textContent;
   const glider = document.getElementById("glider").textContent;
-  const tweetMessage = `I just generated a random track & combo using the #MarioKart8Deluxe Randomizer!\n\nResults:\nTrack - ${track}\nCharacter - ${character}\nVehicle - ${vehicle}\nWheel - ${wheel}\nGlider - ${glider}\nhttps://codymkw.github.io/mk8/`;
-  const tweetMessage2 = `I just generated a random combo using the #MarioKart8Deluxe Randomizer!\n\nResults:\nCharacter - ${character}\nVehicle - ${vehicle}\nWheel - ${wheel}\nGlider - ${glider}\nhttps://codymkw.github.io/mk8/`;
+  const tweetMessage = `I just generated a random track & combo using the #MarioKart8Deluxe Randomizer!\n\nResults:\nTrack - ${track}\nCharacter - ${character}\nVehicle - ${vehicle}\nWheel - ${wheel}\nGlider - ${glider}\nhttps://codymkw.github.io/random-stuff/mk8/`;
+  const tweetMessage2 = `I just generated a random combo using the #MarioKart8Deluxe Randomizer!\n\nResults:\nCharacter - ${character}\nVehicle - ${vehicle}\nWheel - ${wheel}\nGlider - ${glider}\nhttps://codymkw.github.io/random-stuff/mk8/`;
   
   if (document.getElementById("hide-track").checked) {
     navigator.clipboard.writeText(tweetMessage2);
