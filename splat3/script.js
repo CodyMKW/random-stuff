@@ -125,7 +125,7 @@ tweetButton.addEventListener("click", function() {
   const headgear = document.getElementById("headgear").textContent;
   const shirt = document.getElementById("shirt").textContent;
   const shoe = document.getElementById("shoe").textContent;
-  const tweetMessage = `I just generated a random weapon & outfit using the #Splatoon3 Randomizer!\n\nResults:\nWeapon - ${weapon}\nHeadgear - ${headgear}\nShirt - ${shirt}\nShoes - ${shoe}\nhttps://codymkw.github.io/splat3`;
+  const tweetMessage = `I just generated a random weapon & outfit using the #Splatoon3 Randomizer!\n\nResults:\nWeapon - ${weapon}\nHeadgear - ${headgear}\nShirt - ${shirt}\nShoes - ${shoe}\nhttps://codymkw.github.io/random-stuff/splat3`;
   
   navigator.clipboard.writeText(tweetMessage);
   alert("The message was copied to clipboard now you can go to twitter and post it or you can post it somewhere else it's up to you! :D");
