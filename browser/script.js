@@ -1,3 +1,13 @@
+// Function to perform a Google search
+function googleSearch() {
+    const query = document.getElementById('searchInput').value.trim();
+    if (query) {
+        const searchUrl = `https://www.google.com/search?q=${encodeURIComponent(query)}`;
+        document.getElementById('browserFrame').src = searchUrl;
+    }
+}
+
+// Function to navigate based on the URL bar or search query
 function navigateToPage() {
     let urlInput = document.getElementById('url').value.trim();
     let formattedUrl = urlInput;
@@ -26,10 +36,20 @@ function navigateToPage() {
 // Add event listener for "Go" button
 document.getElementById('goButton').addEventListener('click', navigateToPage);
 
-// Add event listener for pressing "Enter" in the input field
+// Add event listener for pressing "Enter" in the URL bar
 document.getElementById('url').addEventListener('keypress', function(event) {
     if (event.key === 'Enter') {
         navigateToPage();
+    }
+});
+
+// Add event listener for Google search
+document.getElementById('searchButton').addEventListener('click', googleSearch);
+
+// Add event listener for pressing "Enter" in the search field
+document.getElementById('searchInput').addEventListener('keypress', function(event) {
+    if (event.key === 'Enter') {
+        googleSearch();
     }
 });
 
