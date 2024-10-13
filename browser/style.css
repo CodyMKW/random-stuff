@@ -1,0 +1,56 @@
+/* Dark theme styling */
+body {
+    margin: 0;
+    font-family: Arial, sans-serif;
+    background-color: #121212;
+    color: #fff;
+}
+
+.browser {
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+}
+
+.header {
+    display: flex;
+    align-items: center;
+    padding: 10px;
+    background-color: #1e1e1e;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+}
+
+.header h1 {
+    font-size: 20px;
+    margin-right: 20px;
+    color: #56c7f7;
+}
+
+.header input {
+    flex-grow: 1;
+    padding: 10px;
+    border: none;
+    border-radius: 4px;
+    margin-right: 10px;
+    background-color: #333;
+    color: #fff;
+}
+
+.header button {
+    padding: 10px;
+    background-color: #56c7f7;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    color: #fff;
+}
+
+.header button:hover {
+    background-color: #1e88e5;
+}
+
+iframe {
+    flex-grow: 1;
+    width: 100%;
+    border: none;
+}
