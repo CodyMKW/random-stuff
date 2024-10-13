@@ -1,14 +1,26 @@
-// Function to handle navigation when "Go" button is clicked or Enter is pressed
 function navigateToPage() {
     let urlInput = document.getElementById('url').value.trim();
     let formattedUrl = urlInput;
 
-    // Try to detect if protocol is missing and fix it
+    // If the input doesn't have a protocol, assume the user didn't specify one
     if (!formattedUrl.match(/^https?:\/\//)) {
-        formattedUrl = 'http://' + formattedUrl;
+        // Try to fetch using 'https://' first
+        formattedUrl = 'https://' + urlInput;
+        
+        fetch(formattedUrl, { method: 'HEAD' })
+            .then(() => {
+                // If HTTPS works, navigate to the HTTPS version
+                document.getElementById('browserFrame').src = formattedUrl;
+            })
+            .catch(() => {
+                // If HTTPS fails, try HTTP
+                formattedUrl = 'http://' + urlInput;
+                document.getElementById('browserFrame').src = formattedUrl;
+            });
+    } else {
+        // If the protocol was already provided (http/https), load the page
+        document.getElementById('browserFrame').src = formattedUrl;
     }
-
-    document.getElementById('browserFrame').src = formattedUrl;
 }
 
 // Add event listener for "Go" button
