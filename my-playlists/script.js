@@ -17,8 +17,20 @@ function displayPlaylists(playlists) {
       <div class="playlist-info">
         <h3>${playlist.name}</h3>
         <a href="${playlist.link}" target="_blank">Listen Now</a>
+        <button class="embed-btn" onclick="generateEmbedCode('${playlist.name}', '${playlist.icon}', '${playlist.link}')">Embed</button>
       </div>
     `;
     container.appendChild(card);
+  });
+}
+
+function generateEmbedCode(name, icon, link) {
+  const embedCode = `
+<iframe src="${link}" title="${name}" style="width:300px; height:150px; border:none; overflow:hidden;" allow="autoplay">
+  <img src="${icon}" alt="${name}" style="width:100%; height:100%; object-fit:cover;">
+</iframe>
+`;
+  navigator.clipboard.writeText(embedCode).then(() => {
+    alert('Embed code copied to clipboard!');
   });
 }
