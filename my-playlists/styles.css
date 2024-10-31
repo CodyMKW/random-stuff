@@ -75,3 +75,23 @@ body {
 .embed-btn:hover {
   background-color: #ff4c4c;
 }
+
+.embed-code-container {
+  margin: 20px;
+  padding: 10px;
+  background-color: #1f1f1f;
+  border: 1px solid #333;
+  color: #fff;
+  border-radius: 5px;
+  text-align: center;
+  width: fit-content;
+  margin-left: auto;
+  margin-right: auto;
+  display: none; /* Hidden by default */
+}
+
+.embed-code {
+  color: #66c2ff;
+  font-family: monospace;
+  overflow-wrap: break-word;
+}
