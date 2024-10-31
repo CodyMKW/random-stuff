@@ -1,11 +1,4 @@
 /* styles.css */
-* {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
-  font-family: Arial, sans-serif;
-}
-
 body {
   background-color: #121212;
   color: #fff;
@@ -15,6 +8,7 @@ body {
   text-align: center;
   padding: 20px;
   border-bottom: 1px solid #333;
+  color: #e60012; /* Nintendo Switch red accent */
 }
 
 .playlist-container {
@@ -27,11 +21,13 @@ body {
 
 .playlist-card {
   background-color: #1f1f1f;
+  border: 1px solid #333;
   border-radius: 10px;
   overflow: hidden;
   width: 200px;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
   transition: transform 0.2s;
+  position: relative;
 }
 
 .playlist-card:hover {
@@ -52,7 +48,7 @@ body {
 .playlist-info h3 {
   font-size: 1.2em;
   margin-bottom: 10px;
-  color: #00cc66; /* Nintendo-style green accent */
+  color: #e60012;
 }
 
 .playlist-info a {
@@ -63,4 +59,19 @@ body {
 
 .playlist-info a:hover {
   color: #3399ff;
+}
+
+.embed-btn {
+  background-color: #e60012;
+  color: #fff;
+  padding: 5px 10px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 0.9em;
+  margin-top: 10px;
+}
+
+.embed-btn:hover {
+  background-color: #ff4c4c;
 }
