@@ -25,12 +25,16 @@ function displayPlaylists(playlists) {
 }
 
 function generateEmbedCode(name, icon, link) {
+  const embedCodeContainer = document.getElementById('embed-code-container');
+  
+  // Generate the embed HTML code
   const embedCode = `
 <iframe src="${link}" title="${name}" style="width:300px; height:150px; border:none; overflow:hidden;" allow="autoplay">
   <img src="${icon}" alt="${name}" style="width:100%; height:100%; object-fit:cover;">
 </iframe>
 `;
-  navigator.clipboard.writeText(embedCode).then(() => {
-    alert('Embed code copied to clipboard!');
-  });
+  
+  // Set the content and make it visible
+  embedCodeContainer.innerHTML = `<p>Embed Code:</p><code class="embed-code">${embedCode}</code>`;
+  embedCodeContainer.style.display = 'block';
 }
