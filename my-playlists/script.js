@@ -17,7 +17,7 @@ function displayPlaylists(playlists) {
       <div class="playlist-info">
         <h3>${playlist.name}</h3>
         <a href="${playlist.link}" target="_blank">Listen Now</a>
-        <button class="embed-btn" onclick="generateEmbedCode('${playlist.name}', '${playlist.icon}', '${playlist.link}')">Embed</button>
+        <button class="embed-btn" onclick="generateEmbedCode('${playlist.name.replace(/'/g, "\\'")}', '${playlist.icon}', '${playlist.link}')">Embed</button>
       </div>
     `;
     container.appendChild(card);
