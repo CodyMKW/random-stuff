@@ -23,7 +23,7 @@ body {
 .page-title {
     text-align: center;
     margin-bottom: 1.5rem;
-    color: #FF4D00; /* Nintendo red */
+    color: #e60012; /* Nintendo red */
     font-size: 2rem;
     font-weight: bold;
 }
@@ -63,4 +63,26 @@ body {
     color: #00BFFF; /* Nintendo blue */
     margin-top: 0.5rem;
     font-weight: 500;
+}
+.app-note {
+    text-align: center;
+    color: #CCCCCC; /* Light gray to blend with the theme */
+    font-size: 1rem;
+    margin-top: 1.5rem;
+}
+
+.app-note p {
+    margin-bottom: 0.5rem;
+}
+
+.app-link {
+    color: #00BFFF; /* Nintendo blue to match the site’s accent color */
+    text-decoration: none;
+    font-weight: bold;
+    padding: 0.5rem;
+    display: inline-block;
+}
+
+.app-link:hover {
+    color: #e60012; /* Nintendo red on hover */
 }
