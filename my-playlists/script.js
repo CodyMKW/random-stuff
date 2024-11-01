@@ -17,11 +17,16 @@ function displayPlaylists(playlists) {
           <div class="playlist-info">
               <h3>${playlist.name}</h3>
               <a href="${playlist.link}" target="_blank">Listen Now</a>
-              <button class="embed-btn" onclick="generateEmbedCode('${playlist.name}', '${playlist.icon}', '${playlist.link}')">Embed</button>
+              <button class="embed-btn" onclick="generateEmbedCode('${escapeQuotes(playlist.name)}', '${playlist.icon}', '${playlist.link}')">Embed</button>
           </div>
       `;
       container.appendChild(card);
   });
+}
+
+// Function to escape quotes
+function escapeQuotes(string) {
+  return string.replace(/'/g, "\\'").replace(/"/g, '\\"');
 }
 
 function generateEmbedCode(name, icon, link) {
