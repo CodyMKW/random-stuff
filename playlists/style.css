@@ -86,3 +86,13 @@ body {
 .app-link:hover {
     color: #e60012; /* Nintendo red on hover */
 }
+
+#logo-container {
+    text-align: center;
+    margin-bottom: 1rem; /* Adjust spacing as needed */
+}
+
+#site-logo {
+    width: 150px; /* Adjust size as needed */
+    height: auto;
+}
