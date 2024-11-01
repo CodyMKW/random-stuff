@@ -1,14 +1,20 @@
 /* styles.css */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
 body {
-  background-color: #121212;
-  color: #fff;
+  background-color: #181818; /* Dark background */
+  color: #e0e0e0; /* Light text color */
+  font-family: 'Arial', sans-serif;
 }
 
 .header {
   text-align: center;
   padding: 20px;
   border-bottom: 1px solid #333;
-  color: #e60012; /* Nintendo Switch red accent */
 }
 
 .playlist-container {
@@ -20,14 +26,12 @@ body {
 }
 
 .playlist-card {
-  background-color: #1f1f1f;
-  border: 1px solid #333;
+  background-color: #282828; /* Slightly lighter than body */
   border-radius: 10px;
   overflow: hidden;
-  width: 200px;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  width: 250px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
   transition: transform 0.2s;
-  position: relative;
 }
 
 .playlist-card:hover {
@@ -48,50 +52,32 @@ body {
 .playlist-info h3 {
   font-size: 1.2em;
   margin-bottom: 10px;
-  color: #e60012;
+  color: #f44336; /* Accent color for titles */
 }
 
 .playlist-info a {
   text-decoration: none;
-  color: #66c2ff;
+  color: #66c2ff; /* Link color */
   font-weight: bold;
 }
 
 .playlist-info a:hover {
-  color: #3399ff;
-}
-
-.embed-btn {
-  background-color: #e60012;
-  color: #fff;
-  padding: 5px 10px;
-  border: none;
-  border-radius: 5px;
-  cursor: pointer;
-  font-size: 0.9em;
-  margin-top: 10px;
-}
-
-.embed-btn:hover {
-  background-color: #ff4c4c;
+  color: #3399ff; /* Hover effect */
 }
 
 .embed-code-container {
-  margin: 20px;
+  margin: 20px auto;
   padding: 10px;
-  background-color: #1f1f1f;
-  border: 1px solid #333;
-  color: #fff;
+  background-color: #282828;
+  border: 1px solid #444;
   border-radius: 5px;
+  color: #fff;
   text-align: center;
-  width: fit-content;
-  margin-left: auto;
-  margin-right: auto;
   display: none; /* Hidden by default */
 }
 
 .embed-code {
-  color: #66c2ff;
+  color: #66c2ff; /* Light blue for code display */
   font-family: monospace;
   overflow-wrap: break-word;
 }
