@@ -13,13 +13,13 @@ function displayPlaylists(playlists) {
       card.classList.add('playlist-card');
 
       card.innerHTML = `
-          <img src="${playlist.icon}" alt="${playlist.name}" class="playlist-icon">
-          <div class="playlist-info">
-              <h3>${playlist.name}</h3>
-              <a href="${playlist.link}" target="_blank">Listen Now</a>
-              <button class="embed-btn" onclick="generateEmbedCode('${playlist.name}', '${playlist.icon}', '${playlist.link}')">Embed</button>
-          </div>
-      `;
+      <img src="${playlist.icon}" alt="${escapeSpecialChars(playlist.name)}" class="playlist-icon">
+      <div class="playlist-info">
+          <h3>${playlist.name}</h3>
+          <a href="${playlist.link}" target="_blank">Listen Now</a>
+          <button class="embed-btn" onclick="generateEmbedCode('${escapeSpecialChars(playlist.name)}', '${escapeSpecialChars(playlist.icon)}', '${escapeSpecialChars(playlist.link)}')">Embed</button>
+      </div>
+    `;    
       container.appendChild(card);
   });
 }
@@ -46,4 +46,8 @@ function copyEmbedCode() {
   } else {
       alert('No embed code to copy!');
   }
+}
+
+function escapeSpecialChars(string) {
+  return string.replace(/'/g, "\\'").replace(/"/g, '\\"');
 }
