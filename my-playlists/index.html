@@ -7,17 +7,21 @@
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-    <div class="header">
+    <header class="header">
         <h1>Nintendo Music Playlists</h1>
         <p>Explore Cody's curated Nintendo playlists</p>
-        <hr class="header-divider">
-    </div>
-    <div class="playlist-container" id="playlist-container">
+    </header>
+
+    <main class="playlist-container" id="playlist-container">
         <!-- Playlist items will be injected here by JavaScript -->
-    </div>
-    <div class="embed-code-container" id="embed-code-container">
-        <!-- Generated embed code will display here -->
-    </div>
+    </main>
+
+    <section class="embed-section" id="embed-code-container">
+        <h2>Embed This Playlist</h2>
+        <pre id="embed-code-display" class="embed-code"></pre>
+        <button class="copy-btn" onclick="copyEmbedCode()">Copy Embed Code</button>
+    </section>
+
     <script src="script.js"></script>
 </body>
 </html>
