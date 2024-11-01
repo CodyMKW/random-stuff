@@ -1,6 +1,6 @@
 // script.js
 document.addEventListener("DOMContentLoaded", () => {
-  fetch('playlists.json')
+  fetch('https://api.npoint.io/69443341fb55442c1f1a')
       .then(response => response.json())
       .then(data => displayPlaylists(data.playlists))
       .catch(error => console.error('Error loading playlists:', error));
