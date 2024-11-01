@@ -1,6 +1,6 @@
 // script.js
 document.addEventListener("DOMContentLoaded", () => {
-  fetch('https://api.npoint.io/69443341fb55442c1f1a')
+  fetch('playlists.json')
       .then(response => response.json())
       .then(data => displayPlaylists(data.playlists))
       .catch(error => console.error('Error loading playlists:', error));
@@ -15,7 +15,7 @@ function displayPlaylists(playlists) {
       card.innerHTML = `
           <img src="${playlist.icon}" alt="${playlist.name}" class="playlist-icon">
           <div class="playlist-info">
-              <h3>${playlist.name}</h3>
+              <h3>${escapeQuotes(playlist.name)}</h3>
               <a href="${playlist.link}" target="_blank">Listen Now</a>
               <button class="embed-btn" onclick="generateEmbedCode('${escapeQuotes(playlist.name)}', '${playlist.icon}', '${playlist.link}')">Embed</button>
           </div>
