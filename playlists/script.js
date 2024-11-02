@@ -11,6 +11,7 @@ function loadPlaylists() {
                 const card = createPlaylistCard(playlist);
                 if (playlist.featured) {
                     featuredContainer.appendChild(card.cloneNode(true)); // Add to featured section
+                    card.onclick = () => window.open(playlist.link, '_blank');
                 }
                 mainContainer.appendChild(card); // Add to main section
             });
