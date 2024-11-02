@@ -157,15 +157,3 @@ body {
     border-radius: 4px;
     font-weight: bold;
 }
-
-#featured-playlist {
-    text-align: center;
-    margin-bottom: 2rem;
-}
-
-#featured-card {
-    width: 100%;
-    max-width: 500px;
-    margin: 0 auto;
-    border: 2px solid #e60012; /* Highlighted border */
-}
