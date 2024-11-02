@@ -75,16 +75,29 @@ body {
     margin-bottom: 0.5rem;
 }
 
-.app-link {
-    color: #00BFFF; /* Nintendo blue to match the site’s accent color */
-    text-decoration: none;
-    font-weight: bold;
-    padding: 0.5rem;
-    display: inline-block;
+.app-links {
+    display: flex;
+    justify-content: center;
+    gap: 1rem;
+    margin-top: 0.5rem;
 }
 
-.app-link:hover {
-    color: #e60012; /* Nintendo red on hover */
+.app-button {
+    display: inline-block;
+    padding: 0.6rem 1.2rem;
+    color: #FFFFFF;
+    background-color: #e60012; /* Nintendo red */
+    border: none;
+    border-radius: 8px;
+    font-size: 1rem;
+    text-align: center;
+    text-decoration: none;
+    font-weight: bold;
+    transition: background-color 0.3s;
+}
+
+.app-button:hover {
+    background-color: #cd0112; /* Slightly darker red on hover */
 }
 
 #logo-container {
