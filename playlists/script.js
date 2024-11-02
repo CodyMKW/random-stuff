@@ -8,12 +8,16 @@ function loadPlaylists() {
             const featuredContainer = document.getElementById('featured-playlist-container');
 
             playlists.forEach(playlist => {
-                const card = createPlaylistCard(playlist);
+                const card = createPlaylistCard(playlist); // Create the card
+
+                // Check if it's a featured playlist
                 if (playlist.featured) {
-                    featuredContainer.appendChild(card.cloneNode(true)); // Add to featured section
-                    card.onclick = () => window.open(playlist.link, '_blank');
+                    // Append a cloned card to the featured container
+                    featuredContainer.appendChild(createPlaylistCard(playlist));
                 }
-                mainContainer.appendChild(card); // Add to main section
+
+                // Append the original card to the main container
+                mainContainer.appendChild(card);
             });
         })
         .catch(error => console.error('Error loading playlists:', error));
