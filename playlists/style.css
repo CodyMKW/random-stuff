@@ -157,3 +157,32 @@ body {
     border-radius: 4px;
     font-weight: bold;
 }
+
+/* Featured Playlist Container */
+#featured-playlist-container {
+    margin-bottom: 2rem;
+}
+
+#featured-playlist-container .playlist-card {
+    border: 2px solid #00FF7F; /* Green border for featured playlists */
+    background-color: #1a1a1a; /* Slightly lighter background */
+    position: relative;
+}
+
+#featured-playlist-container .playlist-card::before {
+    content: "Featured";
+    position: absolute;
+    top: 8px;
+    left: 8px;
+    background-color: #00FF7F; /* Green for featured label */
+    color: #181818;
+    font-size: 0.8rem;
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-weight: bold;
+}
+
+#featured-playlist-container .playlist-card:hover {
+    transform: scale(1.1);
+    box-shadow: 0 6px 12px rgba(0, 255, 127, 0.3); /* Green shadow for hover effect */
+}
