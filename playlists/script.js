@@ -4,10 +4,15 @@ function loadPlaylists() {
     fetch('https://api.npoint.io/28718000abe41036232b')
         .then(response => response.json())
         .then(playlists => {
-            const container = document.getElementById('playlist-container');
+            const mainContainer = document.getElementById('playlist-container');
+            const featuredContainer = document.getElementById('featured-playlist-container');
+
             playlists.forEach(playlist => {
                 const card = createPlaylistCard(playlist);
-                container.appendChild(card);
+                if (playlist.featured) {
+                    featuredContainer.appendChild(card.cloneNode(true)); // Add to featured section
+                }
+                mainContainer.appendChild(card); // Add to main section
             });
         })
         .catch(error => console.error('Error loading playlists:', error));
