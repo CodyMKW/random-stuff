@@ -36,3 +36,17 @@ function createPlaylistCard(playlist) {
 
     return card;
 }
+
+function filterPlaylists() {
+    const query = document.getElementById('search-bar').value.toLowerCase();
+    const playlists = document.querySelectorAll('.playlist-card');
+
+    playlists.forEach(card => {
+        const title = card.querySelector('.playlist-title').textContent.toLowerCase();
+        if (title.includes(query)) {
+            card.style.display = 'block';
+        } else {
+            card.style.display = 'none';
+        }
+    });
+}

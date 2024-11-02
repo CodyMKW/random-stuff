@@ -109,3 +109,19 @@ body {
     color: #CCCCCC; /* Light gray to complement the design */
     margin-top: 0.3rem;
 }
+
+#search-container {
+    text-align: center;
+    margin-bottom: 1rem;
+}
+
+#search-bar {
+    width: 80%;
+    max-width: 400px;
+    padding: 0.5rem;
+    border-radius: 8px;
+    border: 1px solid #333333;
+    background-color: #252525;
+    color: #FFFFFF;
+    font-size: 1rem;
+}
