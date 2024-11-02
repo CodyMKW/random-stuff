@@ -6,11 +6,6 @@ function loadPlaylists() {
         .then(playlists => {
             displayPlaylists(playlists);
             displayFeaturedPlaylist(playlists);
-            const container = document.getElementById('playlist-container');
-            playlists.forEach(playlist => {
-                const card = createPlaylistCard(playlist);
-                container.appendChild(card);
-            });
         })
         .catch(error => console.error('Error loading playlists:', error));
 }
