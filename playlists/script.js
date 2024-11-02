@@ -45,6 +45,13 @@ function createPlaylistCard(playlist) {
     card.appendChild(title);
     card.appendChild(creator);
 
+    // Set data-tags attribute to include all tags for search functionality
+    if (playlist.tags) {
+        card.setAttribute('data-tags', playlist.tags.join(' ')); // Join tags as a single string
+    } else {
+        card.setAttribute('data-tags', ''); // Empty if no tags
+    }
+
     return card;
 }
 
@@ -54,6 +61,7 @@ function filterPlaylists() {
 
     playlists.forEach(card => {
         const title = card.querySelector('.playlist-title').textContent.toLowerCase();
+        const tags = card.getAttribute('data-tags').toLowerCase();
         if (title.includes(query)) {
             card.style.display = 'block';
         } else {
