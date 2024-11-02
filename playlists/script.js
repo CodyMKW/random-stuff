@@ -4,15 +4,11 @@ function loadPlaylists() {
     fetch('https://api.npoint.io/28718000abe41036232b')
         .then(response => response.json())
         .then(playlists => {
-            // Display all playlists
             const container = document.getElementById('playlist-container');
             playlists.forEach(playlist => {
                 const card = createPlaylistCard(playlist);
                 container.appendChild(card);
             });
-
-            // Display featured playlist
-            displayFeaturedPlaylist(playlists);
         })
         .catch(error => console.error('Error loading playlists:', error));
 }
@@ -20,12 +16,10 @@ function loadPlaylists() {
 function createPlaylistCard(playlist) {
     const card = document.createElement('div');
     card.className = 'playlist-card';
-
     // Add a special class for official Nintendo playlists
     if (playlist.creator.toLowerCase() === 'nintendo') {
         card.classList.add('official-playlist');
     }
-
     card.onclick = () => window.open(playlist.link, '_blank');
 
     const icon = document.createElement('img');
@@ -59,23 +53,4 @@ function filterPlaylists() {
             card.style.display = 'none';
         }
     });
-}
-
-function displayFeaturedPlaylist(playlists) {
-    // Find the first playlist marked as featured
-    const featuredPlaylist = playlists.find(playlist => playlist.featured);
-
-    if (featuredPlaylist) {
-        const featuredCard = document.getElementById('featured-card');
-        featuredCard.onclick = () => window.open(featuredPlaylist.link, '_blank');
-
-        featuredCard.innerHTML = `
-            <img src="${featuredPlaylist.icon}" alt="${featuredPlaylist.name} icon">
-            <div class="playlist-title">${featuredPlaylist.name}</div>
-            <div class="playlist-creator">Created by: ${featuredPlaylist.creator}</div>
-            <div class="playlist-tags">${featuredPlaylist.tags.join(', ')}</div>
-        `;
-    } else {
-        console.warn("No featured playlist found in the JSON data.");
-    }
 }
