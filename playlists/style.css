@@ -104,3 +104,8 @@ body {
     margin-bottom: 1.5rem;
 }
 
+.playlist-creator {
+    font-size: 0.9rem;
+    color: #CCCCCC; /* Light gray to complement the design */
+    margin-top: 0.3rem;
+}

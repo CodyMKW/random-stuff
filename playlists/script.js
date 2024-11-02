@@ -26,8 +26,13 @@ function createPlaylistCard(playlist) {
     title.className = 'playlist-title';
     title.textContent = playlist.name;
 
+    const creator = document.createElement('div');
+    creator.className = 'playlist-creator';
+    creator.textContent = `Created by: ${playlist.creator}`;
+
     card.appendChild(icon);
     card.appendChild(title);
+    card.appendChild(creator);
 
     return card;
 }
