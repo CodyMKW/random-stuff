@@ -96,3 +96,11 @@ body {
     width: 150px; /* Adjust size as needed */
     height: auto;
 }
+.page-description {
+    text-align: center;
+    color: #AAAAAA; /* Light gray to contrast subtly with the title */
+    font-size: 1.1rem;
+    margin-top: 0.5rem;
+    margin-bottom: 1.5rem;
+}
+
