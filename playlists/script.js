@@ -16,6 +16,10 @@ function loadPlaylists() {
 function createPlaylistCard(playlist) {
     const card = document.createElement('div');
     card.className = 'playlist-card';
+    // Add a special class for official Nintendo playlists
+    if (playlist.creator.toLowerCase() === 'nintendo') {
+        card.classList.add('official-playlist');
+    }
     card.onclick = () => window.open(playlist.link, '_blank');
 
     const icon = document.createElement('img');
