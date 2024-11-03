@@ -85,6 +85,7 @@ body {
 .app-button {
     display: inline-block;
     padding: 0.6rem 1.2rem;
+    margin-bottom: 1rem;
     color: #FFFFFF;
     background-color: #e60012; /* Nintendo red */
     border: none;
