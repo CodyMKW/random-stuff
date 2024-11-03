@@ -77,20 +77,34 @@ function sortPlaylists() {
     const container = document.getElementById('playlist-container');
     const playlists = Array.from(container.getElementsByClassName('playlist-card'));
 
-    // Sorting logic based on selected option
     playlists.sort((a, b) => {
         const nameA = a.querySelector('.playlist-title').textContent.toLowerCase();
         const nameB = b.querySelector('.playlist-title').textContent.toLowerCase();
+        const creatorA = a.querySelector('.playlist-creator').textContent.toLowerCase();
+        const creatorB = b.querySelector('.playlist-creator').textContent.toLowerCase();
 
-        if (sortOption === 'alphabetical') {
-            return nameA.localeCompare(nameB);
-        } else if (sortOption === 'reverse-alphabetical') {
-            return nameB.localeCompare(nameA);
+        switch (sortOption) {
+            case 'alphabetical':
+                return nameA.localeCompare(nameB);
+            case 'reverse-alphabetical':
+                return nameB.localeCompare(nameA);
+            case 'creator':
+                return creatorA.localeCompare(creatorB);
+            case 'creator-reverse':
+                return creatorB.localeCompare(creatorA);
+            case 'newest':
+                return new Date(b.getAttribute('data-date')) - new Date(a.getAttribute('data-date'));
+            case 'oldest':
+                return new Date(a.getAttribute('data-date')) - new Date(b.getAttribute('data-date'));
+            case 'featured':
+                return (b.getAttribute('data-featured') === "true") - (a.getAttribute('data-featured') === "true");
+            default:
+                return 0;
         }
-        return 0;
     });
 
     // Clear the container and append sorted playlists
     container.innerHTML = '';
     playlists.forEach(playlist => container.appendChild(playlist));
 }
+
