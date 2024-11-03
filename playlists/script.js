@@ -61,8 +61,10 @@ function filterPlaylists() {
 
     playlists.forEach(card => {
         const title = card.querySelector('.playlist-title').textContent.toLowerCase();
-        const tags = card.getAttribute('data-tags').toLowerCase();
-        if (title.includes(query)) {
+        const tags = card.getAttribute('data-tags') ? card.getAttribute('data-tags').toLowerCase() : "";
+
+        // Check if the query matches either the title or tags
+        if (title.includes(query) || tags.includes(query)) {
             card.style.display = 'block';
         } else {
             card.style.display = 'none';
