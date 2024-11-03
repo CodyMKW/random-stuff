@@ -213,3 +213,54 @@ body {
 #form-link-container {
     margin-bottom: 1rem; /* Adjust the amount of space as needed */
 }
+
+/* Dark Theme (default) */
+body.dark-theme {
+    background-color: #181818;
+    color: #FFF;
+}
+
+/* Light Theme */
+body.light-theme {
+    background-color: #FFFFFF;
+    color: #000;
+}
+
+body.light-theme .playlist-card {
+    background-color: #f2f2f2;
+    color: #000;
+}
+
+body.light-theme .playlist-card:hover {
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+}
+
+body.light-theme .app-button, 
+body.light-theme .form-button {
+    background-color: #007bff;
+    color: #FFF;
+}
+
+body.light-theme .app-button:hover, 
+body.light-theme .form-button:hover {
+    background-color: #0056b3;
+}
+
+body.light-theme .official-playlist {
+    border-color: #007bff;
+}
+
+.theme-button {
+    padding: 0.5rem 1rem;
+    font-size: 1rem;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    background-color: #e60012; /* Default to Nintendo red */
+    color: #FFF;
+    transition: background-color 0.3s;
+}
+
+.theme-button:hover {
+    background-color: #cd0112;
+}
