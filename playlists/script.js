@@ -8,13 +8,16 @@ function loadPlaylists() {
             const featuredContainer = document.getElementById('featured-playlist-container');
 
             playlists.forEach(playlist => {
+                const card = createPlaylistCard(playlist); // Create the card
+
+                // Check if it's a featured playlist
                 if (playlist.featured) {
-                    // Add to featured section only
-                    featuredContainer.appendChild(createPlaylistCard(playlist));
-                } else {
-                    // Add to main section only if not featured
-                    mainContainer.appendChild(createPlaylistCard(playlist));
+                    // Append a cloned card to the featured container
+                    featuredContainer.appendChild(card.cloneNode(true)); 
                 }
+
+                // Append the original card to the main container
+                mainContainer.appendChild(card);
             });
         })
         .catch(error => console.error('Error loading playlists:', error));
@@ -99,6 +102,8 @@ function sortPlaylists() {
                 return new Date(b.getAttribute('data-date')) - new Date(a.getAttribute('data-date'));
             case 'oldest':
                 return new Date(a.getAttribute('data-date')) - new Date(b.getAttribute('data-date'));
+            case 'featured':
+                return (b.getAttribute('data-featured') === "true") - (a.getAttribute('data-featured') === "true");
             default:
                 return 0;
         }
