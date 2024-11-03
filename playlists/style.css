@@ -206,3 +206,7 @@ body {
 .form-button:hover {
     background-color: #cd0112; /* Slightly darker red on hover */
 }
+
+#form-link-container {
+    margin-bottom: 1rem; /* Adjust the amount of space as needed */
+}
