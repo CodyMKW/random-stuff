@@ -11,9 +11,10 @@ function loadPlaylists() {
                 const card = createPlaylistCard(playlist); // Create the card
 
                 // Check if it's a featured playlist
-                if (playlist.featured) {
+                if (playlist.featured && featuredCount < 4) {
                     // Append a cloned card to the featured container
-                    featuredContainer.appendChild(card.cloneNode(true)); 
+                    featuredContainer.appendChild(card.cloneNode(true));
+                    featuredCount++; 
                 }
 
                 // Append the original card to the main container
@@ -57,6 +58,9 @@ function createPlaylistCard(playlist) {
 
     // Set data-date attribute for sorting
     card.setAttribute('data-date', playlist.dateAdded);
+
+    // Set data-featured attribute for sorting
+    card.setAttribute('data-featured', playlist.featured ? "true" : "false");
 
     return card;
 }
