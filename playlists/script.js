@@ -96,8 +96,6 @@ function sortPlaylists() {
                 return new Date(b.getAttribute('data-date')) - new Date(a.getAttribute('data-date'));
             case 'oldest':
                 return new Date(a.getAttribute('data-date')) - new Date(b.getAttribute('data-date'));
-            case 'featured':
-                return (b.getAttribute('data-featured') === "true") - (a.getAttribute('data-featured') === "true");
             default:
                 return 0;
         }
