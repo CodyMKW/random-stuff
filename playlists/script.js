@@ -71,3 +71,26 @@ function filterPlaylists() {
         }
     });
 }
+
+function sortPlaylists() {
+    const sortOption = document.getElementById('sort-options').value;
+    const container = document.getElementById('playlist-container');
+    const playlists = Array.from(container.getElementsByClassName('playlist-card'));
+
+    // Sorting logic based on selected option
+    playlists.sort((a, b) => {
+        const nameA = a.querySelector('.playlist-title').textContent.toLowerCase();
+        const nameB = b.querySelector('.playlist-title').textContent.toLowerCase();
+
+        if (sortOption === 'alphabetical') {
+            return nameA.localeCompare(nameB);
+        } else if (sortOption === 'reverse-alphabetical') {
+            return nameB.localeCompare(nameA);
+        }
+        return 0;
+    });
+
+    // Clear the container and append sorted playlists
+    container.innerHTML = '';
+    playlists.forEach(playlist => container.appendChild(playlist));
+}

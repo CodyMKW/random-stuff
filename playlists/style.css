@@ -213,3 +213,18 @@ body {
 #form-link-container {
     margin-bottom: 1rem; /* Adjust the amount of space as needed */
 }
+
+/* Sorting Dropdown Styling */
+.sort-dropdown {
+    padding: 0.5rem;
+    border-radius: 8px;
+    border: 1px solid #333333;
+    background-color: #252525;
+    color: #FFFFFF;
+    font-size: 1rem;
+    margin-left: 0.5rem;
+}
+
+.sort-dropdown option {
+    color: #000; /* Black text color for dropdown options */
+}

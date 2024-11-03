@@ -37,6 +37,11 @@
         </p>
         <div id="search-container">
            <input type="text" id="search-bar" placeholder="Search playlists..." oninput="filterPlaylists()">
+           <select id="sort-options" class="sort-dropdown" onchange="sortPlaylists()">
+             <option value="">Sort by...</option>
+             <option value="alphabetical">Alphabetical (A-Z)</option>
+             <option value="reverse-alphabetical">Alphabetical (Z-A)</option>
+           </select>
         </div>
         <div id="featured-playlist-container" class="playlist-grid">
             <!-- Featured playlist will be injected here -->
