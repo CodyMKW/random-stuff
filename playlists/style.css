@@ -186,3 +186,23 @@ body {
     transform: scale(1.1);
     box-shadow: 0 6px 12px rgba(0, 255, 127, 0.3); /* Green shadow for hover effect */
 }
+
+/* Form Button Styling */
+.form-button {
+    display: inline-block;
+    padding: 0.6rem 1.2rem;
+    color: #FFFFFF;
+    background-color: #e60012; /* Nintendo red */
+    border: none;
+    border-radius: 8px;
+    font-size: 1rem;
+    text-align: center;
+    text-decoration: none;
+    font-weight: bold;
+    transition: background-color 0.3s;
+    cursor: pointer;
+}
+
+.form-button:hover {
+    background-color: #cd0112; /* Slightly darker red on hover */
+}
