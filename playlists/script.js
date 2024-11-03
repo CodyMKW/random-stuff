@@ -71,32 +71,3 @@ function filterPlaylists() {
         }
     });
 }
-
-document.addEventListener('DOMContentLoaded', () => {
-    const themeToggleButton = document.getElementById('theme-toggle');
-    const currentTheme = localStorage.getItem('theme') || 'dark';
-
-    // Apply saved theme on load
-    document.body.classList.add(`${currentTheme}-theme`);
-
-    // Update button text based on theme
-    updateToggleButtonText(currentTheme);
-
-    themeToggleButton.addEventListener('click', () => {
-        document.body.classList.toggle('dark-theme');
-        document.body.classList.toggle('light-theme');
-
-        // Save the theme preference
-        const newTheme = document.body.classList.contains('light-theme') ? 'light' : 'dark';
-        localStorage.setItem('theme', newTheme);
-
-        // Update button text based on the new theme
-        updateToggleButtonText(newTheme);
-    });
-});
-
-// Function to update the toggle button text
-function updateToggleButtonText(theme) {
-    const themeToggleButton = document.getElementById('theme-toggle');
-    themeToggleButton.textContent = theme === 'light' ? 'Switch to Dark Mode' : 'Switch to Light Mode';
-}
