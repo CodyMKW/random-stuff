@@ -109,6 +109,8 @@ body {
 #site-logo {
     width: 150px; /* Adjust size as needed */
     height: auto;
+    margin-top: 1.0rem;
+    border-radius: 50%;
 }
 .page-description {
     text-align: center;
