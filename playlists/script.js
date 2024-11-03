@@ -15,7 +15,7 @@ function loadPlaylists() {
                 // Check if it's a featured playlist
                 if (playlist.featured && featuredCount < 4) {
                     // Append a cloned card to the featured container
-                    featuredContainer.appendChild(card.cloneNode(true));
+                    featuredContainer.appendChild(createPlaylistCard(playlist));
                     featuredCount++; 
                 }
 
