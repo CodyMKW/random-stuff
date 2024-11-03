@@ -7,6 +7,8 @@ function loadPlaylists() {
             const mainContainer = document.getElementById('playlist-container');
             const featuredContainer = document.getElementById('featured-playlist-container');
 
+            let featuredCount = 0;
+
             playlists.forEach(playlist => {
                 const card = createPlaylistCard(playlist); // Create the card
 
