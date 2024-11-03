@@ -52,6 +52,9 @@ function createPlaylistCard(playlist) {
         card.setAttribute('data-tags', ''); // Empty if no tags
     }
 
+    // Set data-date attribute for sorting
+    card.setAttribute('data-date', playlist.dateAdded);
+
     return card;
 }
 
