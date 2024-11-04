@@ -166,6 +166,25 @@ body {
     margin-bottom: 2rem;
 }
 
+.NMCredit-playlist {
+    border: 2px solid #9200e6; /* Purple border for NMCredit playlists */
+    position: relative;
+}
+
+/* Optional: Badge for NMCredit Playlists */
+.NMCredit-playlist::after {
+    content: "Official";
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    background-color: #9200e6;
+    color: #FFF;
+    font-size: 0.7rem;
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-weight: bold;
+}
+
 #featured-playlist-container .playlist-card {
     border: 2px solid #00FF7F; /* Green border for featured playlists */
     background-color: #1a1a1a; /* Slightly lighter background */
