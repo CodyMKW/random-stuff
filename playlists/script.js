@@ -31,6 +31,8 @@ function createPlaylistCard(playlist) {
     card.className = 'playlist-card';
     // Trim spaces from the creator's name and convert to lowercase for reliable comparison
     const creatorName = playlist.creator.trim().toLowerCase();
+    console.log(`Creator: '${playlist.creator}'`); // Debugging log
+    console.log(`Comparing '${creatorName}' to 'nintendo music credit project'`);
 
     // Add a special class for official Nintendo playlists
     if (creatorName === 'nintendo') {
