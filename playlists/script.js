@@ -33,6 +33,10 @@ function createPlaylistCard(playlist) {
     if (playlist.creator.toLowerCase() === 'nintendo') {
         card.classList.add('official-playlist');
     }
+    // Add class for NM Credit Project playlists
+    if (playlist.creator === 'Nintendo Music Credit Project') {
+        card.classList.add('nm-credit-project');
+    }
     card.onclick = () => window.open(playlist.link, '_blank');
 
     const icon = document.createElement('img');

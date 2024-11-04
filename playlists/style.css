@@ -161,6 +161,27 @@ body {
     font-weight: bold;
 }
 
+/* Style for NM Credit Project creator */
+.nm-credit-project {
+    border: 2px solid #800080; /* Purple border for NM Credit Project */
+    position: relative;
+}
+
+/* Badge for NM Credit Project creator */
+.nm-credit-project::after {
+    content: "NM Credit Project";
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    background-color: #800080; /* Purple badge color */
+    color: #FFF;
+    font-size: 0.7rem;
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-weight: bold;
+}
+
+
 /* Featured Playlist Container */
 #featured-playlist-container {
     margin-bottom: 2rem;
