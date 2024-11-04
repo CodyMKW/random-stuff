@@ -29,13 +29,16 @@ function loadPlaylists() {
 function createPlaylistCard(playlist) {
     const card = document.createElement('div');
     card.className = 'playlist-card';
+    // Trim spaces from the creator's name and convert to lowercase for reliable comparison
+    const creatorName = playlist.creator.trim().toLowerCase();
+
     // Add a special class for official Nintendo playlists
-    if (playlist.creator.toLowerCase() === 'nintendo') {
+    if (creatorName === 'nintendo') {
         card.classList.add('official-playlist');
     }
 
     // Add a special class for Nintendo Music Credit Project playlists
-    if (playlist.creator.toLowerCase() === 'nintendo music credit project') {
+    if (creatorName === 'nintendo music credit project') {
         card.classList.add('nm-credit-project');
     }
     card.onclick = () => window.open(playlist.link, '_blank');
