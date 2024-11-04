@@ -34,8 +34,8 @@ function createPlaylistCard(playlist) {
         card.classList.add('official-playlist');
     }
     // Add a special class for official Nintendo Music Credit Project playlists
-    if (playlist.creator.toLowerCase() === 'nintendo-music-credit-project') {
-        card.classList.add('nmcredit-playlist');
+    if (playlist.creator.trim().toLowerCase() === 'nintendo music credit project') {
+    card.classList.add('nmcredit-playlist');
     }
     card.onclick = () => window.open(playlist.link, '_blank');
 
