@@ -166,14 +166,14 @@ body {
     margin-bottom: 2rem;
 }
 
-.NMCredit-playlist {
+.nmcredit-playlist {
     border: 2px solid #9200e6; /* Purple border for NMCredit playlists */
     position: relative;
 }
 
-/* Optional: Badge for NMCredit Playlists */
-.NMCredit-playlist::after {
-    content: "Official";
+/* Badge for NMCredit Playlists */
+.nmcredit-playlist::after {
+    content: "NM Credit Project";
     position: absolute;
     top: 8px;
     right: 8px;
