@@ -161,26 +161,25 @@ body {
     font-weight: bold;
 }
 
-/* Style for NM Credit Project creator */
+/* Badge styling for Nintendo Music Credit Project */
 .nm-credit-project {
-    border: 2px solid #800080; /* Purple border for NM Credit Project */
+    border: 2px solid #800080; /* Purple border */
     position: relative;
 }
 
-/* Badge for NM Credit Project creator */
+/* Badge for NM Credit Project */
 .nm-credit-project::after {
     content: "NM Credit Project";
     position: absolute;
     top: 8px;
     right: 8px;
-    background-color: #800080; /* Purple badge color */
+    background-color: #800080; /* Purple color for badge */
     color: #FFF;
     font-size: 0.7rem;
     padding: 2px 6px;
     border-radius: 4px;
     font-weight: bold;
 }
-
 
 /* Featured Playlist Container */
 #featured-playlist-container {
