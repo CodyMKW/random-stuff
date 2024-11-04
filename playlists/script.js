@@ -31,6 +31,7 @@ function createPlaylistCard(playlist) {
     card.className = 'playlist-card';
     // Trim spaces from the creator's name and convert to lowercase for reliable comparison
     const creatorName = playlist.creator.trim().toLowerCase();
+    const comparisonName = 'nintendo music credit project'.trim().toLowerCase();
     console.log(`Creator: '${playlist.creator}'`); // Debugging log
     console.log(`Comparing '${creatorName}' to 'nintendo music credit project'`);
 
@@ -40,9 +41,9 @@ function createPlaylistCard(playlist) {
     }
 
     // Add a special class for Nintendo Music Credit Project playlists
-    if (creatorName === 'nintendo music credit project') {
+    if (creatorName === comparisonName) {
         card.classList.add('nm-credit-project');
-    }
+    }    
     card.onclick = () => window.open(playlist.link, '_blank');
 
     const icon = document.createElement('img');
