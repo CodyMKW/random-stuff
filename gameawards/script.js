@@ -14,6 +14,7 @@ fetch('https://api.npoint.io/708f25230f6d3ca036e1')
             const card = document.createElement('div');
             card.classList.add('category-card');
             card.innerHTML = `
+                <img src="${category.image}" alt="${category.name}">
                 <h3>${category.name}</h3>
                 <p><strong>Winner:</strong> ${category.winner}</p>
                 <p>${category.description}</p>
