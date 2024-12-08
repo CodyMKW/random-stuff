@@ -104,6 +104,68 @@ h2 {
     color: #bbb;
 }
 
+/* Game of the Year Section */
+.goty-section {
+    margin-top: 40px;
+    text-align: center;
+    padding: 20px;
+    background: linear-gradient(135deg, #333, #222);
+    border-radius: 15px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
+    color: #f4f4f4;
+}
+
+.goty-section h2 {
+    color: #ffcc00;
+    font-size: 2rem;
+    margin-bottom: 20px;
+}
+
+.goty-highlight {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 20px;
+}
+
+.goty-highlight .goty-image-container {
+    max-width: 500px;
+    width: 100%;
+    border-radius: 15px;
+    overflow: hidden;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.7);
+}
+
+.goty-highlight img {
+    width: 100%;
+    height: auto;
+    transition: transform 0.3s ease-in-out;
+}
+
+.goty-highlight img:hover {
+    transform: scale(1.05);
+}
+
+.goty-details {
+    max-width: 600px;
+    text-align: center;
+    padding: 10px 20px;
+    background: rgba(0, 0, 0, 0.6);
+    border-radius: 10px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.7);
+}
+
+.goty-details h3 {
+    font-size: 1.8rem;
+    color: #ffcc00;
+    margin-bottom: 15px;
+}
+
+.goty-details p {
+    font-size: 1rem;
+    color: #ddd;
+}
+
 /* Footer */
 footer {
     text-align: center;
