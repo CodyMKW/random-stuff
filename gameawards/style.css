@@ -1,0 +1,86 @@
+/* General Styles */
+body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+    color: #333;
+    background: linear-gradient(120deg, #1e3c72, #2a5298);
+}
+
+/* Header */
+.header {
+    text-align: center;
+    color: #fff;
+    padding: 20px;
+    background: #222;
+}
+
+.header h1 {
+    margin: 0;
+    font-size: 2.5em;
+}
+
+/* Content */
+.content {
+    max-width: 900px;
+    margin: 20px auto;
+    background: #fff;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+h2 {
+    text-align: center;
+    color: #1e3c72;
+}
+
+/* Awards Container */
+.awards-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+    justify-content: center;
+}
+
+.category-card {
+    background: #f4f4f4;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    padding: 10px;
+    text-align: center;
+    width: 250px;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+}
+
+.category-card h3 {
+    font-size: 1.2em;
+    margin-bottom: 10px;
+}
+
+/* Game of the Year Section */
+.goty-card {
+    text-align: center;
+    margin-top: 20px;
+}
+
+.goty-card h3 {
+    font-size: 1.8em;
+    color: #1e3c72;
+}
+
+.goty-card img {
+    max-width: 100%;
+    height: auto;
+    border-radius: 8px;
+    margin: 10px 0;
+}
+
+/* Footer */
+footer {
+    text-align: center;
+    color: #fff;
+    background: #222;
+    padding: 10px;
+    margin-top: 20px;
+}
