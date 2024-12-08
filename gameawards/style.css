@@ -25,6 +25,16 @@ body {
     background: #f4a261;
 }
 
+/* Share Success Message */
+.share-success-message {
+    display: none;
+    margin-top: 10px;
+    color: #28a745; /* Green for success */
+    font-size: 1rem;
+    font-weight: bold;
+    text-align: center;
+}
+
 /* Header */
 .header {
     text-align: center;

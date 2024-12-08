@@ -19,6 +19,7 @@ fetch('https://api.npoint.io/708f25230f6d3ca036e1')
                 <p><strong>Winner:</strong> ${category.winner}</p>
                 <p>${category.description}</p>
                 <button class="share-btn" data-game="${category.winner}" data-category="${category.name}">Share</button>
+                <p class="share-success-message">Text copied to clipboard!</p>
             `;
             awardsContainer.appendChild(card);
         });
@@ -37,7 +38,14 @@ fetch('https://api.npoint.io/708f25230f6d3ca036e1')
                 
                 // Copy text to clipboard
                 navigator.clipboard.writeText(shareText).then(() => {
-                    alert('Text copied to clipboard!');
+                    // Show success message
+                    const successMessage = button.nextElementSibling; // The p tag with class share-success-message
+                    successMessage.style.display = 'block';
+                    
+                    // Hide success message after 3 seconds
+                    setTimeout(() => {
+                        successMessage.style.display = 'none';
+                    }, 3000);
                 }).catch(err => {
                     console.error('Failed to copy text: ', err);
                 });
@@ -54,7 +62,14 @@ fetch('https://api.npoint.io/708f25230f6d3ca036e1')
     
                 // Copy text to clipboard
                 navigator.clipboard.writeText(shareText).then(() => {
-                    alert('Text copied to clipboard!');
+                    // Show success message
+                    const successMessage = gotyShareButton.nextElementSibling;
+                    successMessage.style.display = 'block';
+    
+                    // Hide success message after 3 seconds
+                    setTimeout(() => {
+                        successMessage.style.display = 'none';
+                    }, 3000);
                 }).catch(err => {
                     console.error('Failed to copy text: ', err);
                 });
