@@ -216,27 +216,21 @@
         return;
       }
 
-      const activities = [
-        "You read a book and feel refreshed.",
-        "You took a nap and gained some energy.",
-        "You cooked a delicious meal.",
-        "You organized your inventory.",
-        "You wrote a journal entry about your day."
-      ];
-      const activity = activities[Math.floor(Math.random() * activities.length)];
-
-      document.getElementById("output").innerText = activity;
+      gameState.time = "Morning";
+      gameState.day += 1;
+      document.getElementById("output").innerText = "You feel refreshed! A new day begins.";
+      updateStatus();
     }
 
     function saveGame() {
-      localStorage.setItem("gameState", JSON.stringify(gameState));
+      localStorage.setItem("VillageChroniclesSave", JSON.stringify(gameState));
       document.getElementById("output").innerText = "Game saved successfully!";
     }
 
     function loadGame() {
-      const savedState = JSON.parse(localStorage.getItem("gameState"));
-      if (savedState) {
-        gameState = savedState;
+      const savedData = localStorage.getItem("VillageChroniclesSave");
+      if (savedData) {
+        gameState = JSON.parse(savedData);
         updateStatus();
         document.getElementById("output").innerText = "Game loaded successfully!";
       } else {
@@ -244,10 +238,7 @@
       }
     }
 
-    // Initialize game
-    window.onload = function () {
-      loadGame();
-    };
+    window.onload = loadGame;
   </script>
 </body>
 </html>
