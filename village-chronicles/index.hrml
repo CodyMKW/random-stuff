@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Welcome to Village Chronicles, a charming text-based life simulation game where you can fish, chat with villagers, and explore your surroundings!">
+  <meta property="og:title" content="Village Chronicles">
+  <meta property="og:description" content="Dive into the cozy world of Village Chronicles, a delightful text-based life simulation adventure!">
+  <meta property="og:image" content="/random-stuff/village-chronicles/assets/game-image.png">
+  <meta property="og:url" content="https://codymkw.github.io/random-stuff/village-chronicles">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Village Chronicles">
+  <meta name="twitter:description" content="Experience the charm of Village Chronicles, a text-based life sim where adventure awaits!">
+  <meta name="twitter:image" content="/random-stuff/village-chronicles/assets/game-image.png">
+  <title>Village Chronicles</title>
+  <style>
+    body {
+      font-family: "Arial", sans-serif;
+      background-color: #cbeef3;
+      color: #333;
+      margin: 0;
+      padding: 0;
+    }
+    #game {
+      margin: 20px auto;
+      max-width: 600px;
+      padding: 20px;
+      border: 2px solid #89c9b8;
+      border-radius: 10px;
+      background-color: #fff;
+    }
+    #actions button {
+      margin: 5px;
+      padding: 10px;
+      background-color: #89c9b8;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+    #map {
+      display: flex;
+      justify-content: space-around;
+      margin-top: 20px;
+    }
+    .location {
+      padding: 10px;
+      background-color: #f4d1ae;
+      border: 2px solid #f6a18b;
+      border-radius: 5px;
+      cursor: pointer;
+      text-align: center;
+    }
+    .location:hover {
+      background-color: #f6a18b;
+    }
+  </style>
+</head>
+<body>
+  <div id="game">
+    <div id="status-bar">Day: <span id="day">1</span> | Time: <span id="time">Morning</span></div>
+    <div id="actions">
+      <button onclick="fish()">Go Fishing</button>
+      <button onclick="talkToVillager()">Talk to Villager</button>
+      <button onclick="checkInventory()">Check Inventory</button>
+      <button onclick="saveGame()">Save Game</button>
+    </div>
+    <div id="output"></div>
+    <div id="map">
+      <div class="location" onclick="visitLocation('Village Square')">Village Square</div>
+      <div class="location" onclick="visitLocation('River')">River</div>
+      <div class="location" onclick="visitLocation('Home')">Home</div>
+    </div>
+  </div>
+
+  <script>
+    let gameState = {
+      day: 1,
+      time: "Morning",
+      inventory: [],
+      villagers: ["Peanut", "Marshall", "Isabelle"],
+      upgrades: { fishingRod: false },
+      location: "Home",
+    };
+
+    function updateStatus() {
+      document.getElementById("day").innerText = gameState.day;
+      document.getElementById("time").innerText = gameState.time;
+    }
+
+    function fish() {
+      if (gameState.location !== "River") {
+        document.getElementById("output").innerText = "You need to go to the River to fish.";
+        return;
+      }
+
+      const catchChance = Math.random();
+      const fish = catchChance > 0.5 ? "Bass" : "nothing";
+
+      if (fish !== "nothing") {
+        gameState.inventory.push(fish);
+        document.getElementById("output").innerText = `You caught a ${fish}!`;
+        if (!gameState.upgrades.fishingRod && gameState.inventory.length >= 3) {
+          unlockFishingRod();
+        }
+      } else {
+        document.getElementById("output").innerText = "You didn't catch anything.";
+      }
+    }
+
+    function talkToVillager() {
+      if (gameState.location !== "Village Square") {
+        document.getElementById("output").innerText = "You need to go to the Village Square to talk to villagers.";
+        return;
+      }
+
+      const villager = gameState.villagers[Math.floor(Math.random() * gameState.villagers.length)];
+      document.getElementById("output").innerText = `${villager}: "Hi there! Nice day, isn't it?"`;
+    }
+
+    function checkInventory() {
+      const inventoryText = gameState.inventory.length ? gameState.inventory.join(", ") : "Your inventory is empty.";
+      document.getElementById("output").innerText = `Inventory: ${inventoryText}`;
+    }
+
+    function visitLocation(location) {
+      gameState.location = location;
+      document.getElementById("output").innerText = `You are now at the ${location}.`;
+    }
+
+    function unlockFishingRod() {
+      gameState.upgrades.fishingRod = true;
+      document.getElementById("output").innerText += "\nYou unlocked a new Fishing Rod! Your chances of catching fish have improved.";
+    }
+
+    function saveGame() {
+      localStorage.setItem("gameState", JSON.stringify(gameState));
+      document.getElementById("output").innerText = "Game saved successfully!";
+    }
+
+    function loadGame() {
+      const savedState = JSON.parse(localStorage.getItem("gameState"));
+      if (savedState) {
+        gameState = savedState;
+        updateStatus();
+        document.getElementById("output").innerText = "Game loaded successfully!";
+      } else {
+        document.getElementById("output").innerText = "No saved game found.";
+      }
+    }
+
+    // Initialize game
+    window.onload = function () {
+      loadGame();
+    };
+  </script>
+</body>
+</html>
