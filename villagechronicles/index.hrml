@@ -6,12 +6,12 @@
   <meta name="description" content="Welcome to Village Chronicles, a charming text-based life simulation game where you can fish, chat with villagers, and explore your surroundings!">
   <meta property="og:title" content="Village Chronicles">
   <meta property="og:description" content="Dive into the cozy world of Village Chronicles, a delightful text-based life simulation adventure!">
-  <meta property="og:image" content="/random-stuff/village-chronicles/assets/game-image.png">
-  <meta property="og:url" content="https://codymkw.github.io/random-stuff/village-chronicles">
+  <meta property="og:image" content="/random-stuff/villagechronicles/assets/game-image.png">
+  <meta property="og:url" content="https://codymkw.github.io/random-stuff/villagechronicles">
   <meta name="twitter:card" content="summary_large_image">
   <meta name="twitter:title" content="Village Chronicles">
   <meta name="twitter:description" content="Experience the charm of Village Chronicles, a text-based life sim where adventure awaits!">
-  <meta name="twitter:image" content="/random-stuff/village-chronicles/assets/game-image.png">
+  <meta name="twitter:image" content="/random-stuff/villagechronicles/assets/game-image.png">
   <title>Village Chronicles</title>
   <style>
     body {
