@@ -3,16 +3,16 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="description" content="Welcome to Village Chronicles, a charming text-based life simulation game where you can fish, chat with villagers, and explore your surroundings!">
-  <meta property="og:title" content="Village Chronicles">
-  <meta property="og:description" content="Dive into the cozy world of Village Chronicles, a delightful text-based life simulation adventure!">
+  <meta name="description" content="Welcome to Village Chronicles Beta, a charming text-based life simulation game where you can fish, chat with villagers, and explore your surroundings!">
+  <meta property="og:title" content="Village Chronicles Beta">
+  <meta property="og:description" content="Dive into the cozy world of Village Chronicles Beta, a delightful text-based life simulation adventure!">
   <meta property="og:image" content="/random-stuff/village-chronicles/assets/game-image.png">
   <meta property="og:url" content="https://codymkw.github.io/random-stuff/village-chronicles">
   <meta name="twitter:card" content="summary_large_image">
-  <meta name="twitter:title" content="Village Chronicles">
-  <meta name="twitter:description" content="Experience the charm of Village Chronicles, a text-based life sim where adventure awaits!">
+  <meta name="twitter:title" content="Village Chronicles Beta">
+  <meta name="twitter:description" content="Experience the charm of Village Chronicles Beta, a text-based life sim where adventure awaits!">
   <meta name="twitter:image" content="/random-stuff/village-chronicles/assets/game-image.png">
-  <title>Village Chronicles</title>
+  <title>Village Chronicles Beta</title>
   <style>
     body {
       font-family: "Arial", sans-serif;
@@ -62,6 +62,7 @@
       <button onclick="fish()">Go Fishing</button>
       <button onclick="talkToVillager()">Talk to Villager</button>
       <button onclick="checkInventory()">Check Inventory</button>
+      <button onclick="relaxAtHome()">Relax at Home</button>
       <button onclick="saveGame()">Save Game</button>
     </div>
     <div id="output"></div>
@@ -77,9 +78,10 @@
       day: 1,
       time: "Morning",
       inventory: [],
-      villagers: ["Peanut", "Marshall", "Isabelle"],
+      villagers: ["Peanut", "Marshall", "Isabelle", "Tom", "Rosie", "Goldie", "Fauna", "Bob", "K.K.", "Blathers"],
       upgrades: { fishingRod: false },
       location: "Home",
+      fishTypes: ["Bass", "Salmon", "Trout", "Carp", "Catfish"],
     };
 
     function updateStatus() {
@@ -94,7 +96,7 @@
       }
 
       const catchChance = Math.random();
-      const fish = catchChance > 0.5 ? "Bass" : "nothing";
+      const fish = catchChance > 0.3 ? gameState.fishTypes[Math.floor(Math.random() * gameState.fishTypes.length)] : "nothing";
 
       if (fish !== "nothing") {
         gameState.inventory.push(fish);
@@ -114,7 +116,16 @@
       }
 
       const villager = gameState.villagers[Math.floor(Math.random() * gameState.villagers.length)];
-      document.getElementById("output").innerText = `${villager}: "Hi there! Nice day, isn't it?"`;
+      const dialogues = [
+        "Hi there! Nice day, isn't it?",
+        "I've been working on my garden. Want to see it sometime?",
+        "I just caught a huge fish! It was this big!",
+        "Do you like music? I've been learning the guitar lately.",
+        "You should visit the shop. They've got some cool stuff today!"
+      ];
+      const dialogue = dialogues[Math.floor(Math.random() * dialogues.length)];
+
+      document.getElementById("output").innerText = `${villager}: "${dialogue}"`;
     }
 
     function checkInventory() {
@@ -130,6 +141,24 @@
     function unlockFishingRod() {
       gameState.upgrades.fishingRod = true;
       document.getElementById("output").innerText += "\nYou unlocked a new Fishing Rod! Your chances of catching fish have improved.";
+    }
+
+    function relaxAtHome() {
+      if (gameState.location !== "Home") {
+        document.getElementById("output").innerText = "You need to be at home to relax.";
+        return;
+      }
+
+      const activities = [
+        "You read a book and feel refreshed.",
+        "You took a nap and gained some energy.",
+        "You cooked a delicious meal.",
+        "You organized your inventory.",
+        "You wrote a journal entry about your day."
+      ];
+      const activity = activities[Math.floor(Math.random() * activities.length)];
+
+      document.getElementById("output").innerText = activity;
     }
 
     function saveGame() {
