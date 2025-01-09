@@ -1,0 +1,43 @@
+body {
+    font-family: "Arial", sans-serif;
+    background-color: #cbeef3;
+    color: #333;
+    margin: 0;
+    padding: 0;
+  }
+  #game {
+    margin: 20px auto;
+    max-width: 600px;
+    padding: 20px;
+    border: 2px solid #89c9b8;
+    border-radius: 10px;
+    background-color: #fff;
+  }
+  #actions button {
+    margin: 5px;
+    padding: 10px;
+    background-color: #89c9b8;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+  }
+  #map {
+    display: flex;
+    justify-content: space-around;
+    margin-top: 20px;
+  }
+  .location {
+    padding: 10px;
+    background-color: #f4d1ae;
+    border: 2px solid #f6a18b;
+    border-radius: 5px;
+    cursor: pointer;
+    text-align: center;
+  }
+  .location:hover {
+    background-color: #f6a18b;
+  }
+  #currency {
+    margin-top: 10px;
+    font-weight: bold;
+  }
