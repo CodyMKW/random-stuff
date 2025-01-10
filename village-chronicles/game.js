@@ -126,7 +126,7 @@ function catchBugs() {
     if (gameState.bugNet.type === 'Basic Net' && rarityChance > 0.7) caughtBug = 'Grasshopper';
     if (gameState.bugNet.type === 'Sturdy Net' && rarityChance > 0.5) caughtBug = 'Monarch Butterfly';
     if (gameState.bugNet.type === 'Pro Net' && rarityChance > 0.3) caughtBug = 'Mantis';
-    if (gameState.bugNet.type === 'Pro Net' && rarityChance > 0.85) caughtBug = 'Rare Beetle!';
+    if (gameState.bugNet.type === 'Pro Net' && rarityChance > 0.85) caughtBug = 'Rare Beetle';
 
     outputMessage(`You caught a ${caughtBug}!`, 'positive');
     gameState.inventory[caughtBug] = (gameState.inventory[caughtBug] || 0) + 1;
