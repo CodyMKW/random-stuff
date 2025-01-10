@@ -1,157 +1,298 @@
+const playerNameElement = document.getElementById('player-name');
+const bellsElement = document.getElementById('bells');
+const outputElement = document.getElementById('output');
+
 let gameState = {
-    day: 1,
-    time: "Morning",
-    currency: 0,
-    inventory: [],
-    villagers: ["Peanut", "Marshall", "Isabelle", "Tom", "Rosie", "Goldie", "Fauna", "Bob", "K.K.", "Blathers", "Lily", "Celia", "Muffy", "Jay", "Skye"],
-    upgrades: { fishingRod: false },
-    location: "Home",
-    fishTypes: [
-      { name: "Bass", rarity: 0.6 },
-      { name: "Salmon", rarity: 0.4 },
-      { name: "Trout", rarity: 0.3 },
-      { name: "Carp", rarity: 0.5 },
-      { name: "Catfish", rarity: 0.2 },
-      { name: "Golden Carp", rarity: 0.1 }
-    ],
-    bugTypes: [
-      { name: "Butterfly", rarity: 0.6 },
-      { name: "Beetle", rarity: 0.4 },
-      { name: "Dragonfly", rarity: 0.3 },
-      { name: "Moth", rarity: 0.5 },
-      { name: "Firefly", rarity: 0.2 },
-      { name: "Golden Beetle", rarity: 0.1 }
-    ]
-  };
+    playerName: '',
+    bells: 100,
+    inventory: {},
+    fishingRod: null,
+    bugNet: null,
+    lastSave: Date.now()
+};
 
-  function updateStatus() {
-    document.getElementById("day").innerText = gameState.day;
-    document.getElementById("time").innerText = gameState.time;
-    document.getElementById("player-currency").innerText = gameState.currency;
-  }
+const rodTypes = {
+    'Basic Rod': { durability: 10, price: 100 },
+    'Sturdy Rod': { durability: 25, price: 250 },
+    'Pro Rod': { durability: 50, price: 500 }
+};
 
-  function fish() {
-    if (gameState.location !== "River") {
-      document.getElementById("output").innerText = "You need to go to the River to fish.";
-      return;
-    }
+const netTypes = {
+    'Basic Net': { durability: 10, price: 80 },
+    'Sturdy Net': { durability: 25, price: 200 },
+    'Pro Net': { durability: 40, price: 400 }
+};
 
-    const catchChance = Math.random();
-    const fish = gameState.fishTypes.find(f => catchChance <= f.rarity) || { name: "nothing" };
+const shopInventory = {
+    'Basic Rod': 100,
+    'Sturdy Rod': 250,
+    'Pro Rod': 500,
+    'Basic Net': 80,
+    'Sturdy Net': 200,
+    'Pro Net': 400
+};
 
-    if (fish.name !== "nothing") {
-      gameState.inventory.push(fish.name);
-      document.getElementById("output").innerText = `You caught a ${fish.name}!`;
-      if (!gameState.upgrades.fishingRod && gameState.inventory.length >= 3) {
-        unlockFishingRod();
-      }
+// Function to save the game state to local storage
+function saveGame() {
+    localStorage.setItem('villageChroniclesSave', JSON.stringify(gameState));
+    gameState.lastSave = Date.now();
+    outputMessage("Game saved!", 'positive');
+}
+
+// Function to load the game state from local storage
+function loadGame() {
+    const savedGame = localStorage.getItem('villageChroniclesSave');
+    if (savedGame) {
+        gameState = JSON.parse(savedGame);
+        outputMessage("Game loaded.", 'info');
     } else {
-      document.getElementById("output").innerText = "You didn't catch anything.";
+        const name = prompt("Welcome to Village Chronicles! What's your name?");
+        gameState.playerName = name || 'Traveler';
+        outputMessage(`Welcome, ${gameState.playerName}!`, 'positive');
+        saveGame();
     }
-  }
+    updateDisplay();
+}
 
-  function catchBug() {
-    if (gameState.location !== "Forest") {
-      document.getElementById("output").innerText = "You need to go to the Forest to catch bugs.";
-      return;
+// Function to update the displayed game status
+function updateDisplay() {
+    playerNameElement.textContent = gameState.playerName;
+    bellsElement.textContent = gameState.bells;
+}
+
+// Function to display a message in the output area
+function outputMessage(message, type = '') {
+    const messageElement = document.createElement('p');
+    messageElement.textContent = message;
+    if (type) {
+        messageElement.classList.add(type);
+    }
+    outputElement.appendChild(messageElement);
+    outputElement.scrollTop = outputElement.scrollHeight;
+}
+
+// Game actions
+function forage() {
+    const possibleItems = ['Berry', 'Twig', 'Stone', 'Flower', 'Mushroom', 'Shell', 'Feather'];
+    const randomItem = possibleItems[Math.floor(Math.random() * possibleItems.length)];
+    gameState.inventory[randomItem] = (gameState.inventory[randomItem] || 0) + 1;
+    outputMessage(`You found a ${randomItem}!`, 'positive');
+    updateDisplay();
+}
+
+function fish() {
+    if (!gameState.fishingRod) {
+        outputMessage("You need a fishing rod! Visit the shop to buy one.", 'negative');
+        return;
     }
 
-    const catchChance = Math.random();
-    const bug = gameState.bugTypes.find(b => catchChance <= b.rarity) || { name: "nothing" };
+    gameState.fishingRod.durability--;
+    if (gameState.fishingRod.durability <= 0) {
+        outputMessage(`Your ${gameState.fishingRod.type} broke!`, 'negative');
+        gameState.fishingRod = null;
+        updateDisplay();
+        return;
+    }
 
-    if (bug.name !== "nothing") {
-      gameState.inventory.push(bug.name);
-      document.getElementById("output").innerText = `You caught a ${bug.name}!`;
+    const rarityChance = Math.random();
+    let caughtFish = 'Tiny Fish';
+    if (gameState.fishingRod.type === 'Basic Rod' && rarityChance > 0.7) caughtFish = 'Small Fish';
+    if (gameState.fishingRod.type === 'Sturdy Rod' && rarityChance > 0.5) caughtFish = 'Medium Fish';
+    if (gameState.fishingRod.type === 'Pro Rod' && rarityChance > 0.3) caughtFish = 'Large Fish';
+    if (gameState.fishingRod.type === 'Pro Rod' && rarityChance > 0.85) caughtFish = 'Rare Fish!';
+
+    outputMessage(`You caught a ${caughtFish}!`, 'positive');
+    gameState.inventory[caughtFish] = (gameState.inventory[caughtFish] || 0) + 1;
+    updateDisplay();
+}
+
+function catchBugs() {
+    if (!gameState.bugNet) {
+        outputMessage("You need a bug net! Visit the shop to buy one.", 'negative');
+        return;
+    }
+
+    gameState.bugNet.durability--;
+    if (gameState.bugNet.durability <= 0) {
+        outputMessage(`Your ${gameState.bugNet.type} broke!`, 'negative');
+        gameState.bugNet = null;
+        updateDisplay();
+        return;
+    }
+
+    const rarityChance = Math.random();
+    let caughtBug = 'Common Butterfly';
+    if (gameState.bugNet.type === 'Basic Net' && rarityChance > 0.7) caughtBug = 'Grasshopper';
+    if (gameState.bugNet.type === 'Sturdy Net' && rarityChance > 0.5) caughtBug = 'Monarch Butterfly';
+    if (gameState.bugNet.type === 'Pro Net' && rarityChance > 0.3) caughtBug = 'Mantis';
+    if (gameState.bugNet.type === 'Pro Net' && rarityChance > 0.85) caughtBug = 'Rare Beetle!';
+
+    outputMessage(`You caught a ${caughtBug}!`, 'positive');
+    gameState.inventory[caughtBug] = (gameState.inventory[caughtBug] || 0) + 1;
+    updateDisplay();
+}
+
+function checkInventory() {
+    outputMessage("Inventory:", 'info');
+    for (const item in gameState.inventory) {
+        outputMessage(`- ${item}: ${gameState.inventory[item]}`, 'info');
+    }
+    if (gameState.fishingRod) {
+        outputMessage(`- Equipped Fishing Rod: ${gameState.fishingRod.type} (Durability: ${gameState.fishingRod.durability})`, 'info');
     } else {
-      document.getElementById("output").innerText = "You didn't catch anything.";
+        outputMessage("- No fishing rod equipped.", 'info');
     }
-  }
+    if (gameState.bugNet) {
+        outputMessage(`- Equipped Bug Net: ${gameState.bugNet.type} (Durability: ${gameState.bugNet.durability})`, 'info');
+    } else {
+        outputMessage("- No bug net equipped.", 'info');
+    }
+    if (Object.keys(gameState.inventory).length === 0 && !gameState.fishingRod && !gameState.bugNet) {
+        outputMessage("Your inventory is empty.", 'info');
+    }
+}
 
-  function talkToVillager() {
-    if (gameState.location !== "Village Square") {
-      document.getElementById("output").innerText = "You need to go to the Village Square to talk to villagers.";
-      return;
+function sellItem() {
+    const inventoryItems = Object.keys(gameState.inventory);
+    if (inventoryItems.length === 0) {
+        outputMessage("Your inventory is empty. Nothing to sell.", 'negative');
+        return;
     }
 
-    const villager = gameState.villagers[Math.floor(Math.random() * gameState.villagers.length)];
-    const dialogues = [
-      "Hi there! Nice day, isn't it?",
-      "I've been working on my garden. Want to see it sometime?",
-      "I just caught a huge fish! It was this big!",
-      "Do you like music? I've been learning the guitar lately.",
-      "You should visit the shop. They've got some cool stuff today!",
-      "I heard there's a rare bug in the forest!",
-      "Have you been fishing lately? The river's teeming with life!",
-      "I baked some cookies earlier. Maybe I'll share next time!"
+    const itemToSell = prompt(`What item do you want to sell? (Available: ${inventoryItems.join(', ')})`);
+    if (!itemToSell) return;
+
+    if (!gameState.inventory.hasOwnProperty(itemToSell)) {
+        outputMessage(`You don't have any ${itemToSell} to sell.`, 'negative');
+        return;
+    }
+
+    const quantityToSell = parseInt(prompt(`How many ${itemToSell} do you want to sell?`), 10);
+    if (isNaN(quantityToSell) || quantityToSell <= 0) {
+        outputMessage("Invalid quantity.", 'negative');
+        return;
+    }
+
+    if (quantityToSell > gameState.inventory[itemToSell]) {
+        outputMessage(`You only have ${gameState.inventory[itemToSell]} ${itemToSell}.`, 'negative');
+        return;
+    }
+
+    const sellPrice = 25;
+    const totalPrice = sellPrice * quantityToSell;
+
+    gameState.inventory[itemToSell] -= quantityToSell;
+    if (gameState.inventory[itemToSell] === 0) {
+        delete gameState.inventory[itemToSell];
+    }
+    gameState.bells += totalPrice;
+    outputMessage(`Sold ${quantityToSell} ${itemToSell} for ${totalPrice} Bells.`, 'positive');
+    updateDisplay();
+}
+
+function talkToVillager() {
+    const possibleVillagers = ['Bob', 'Alice', 'Charlie', 'Daisy', 'Patches', 'Poppy', 'Rosie', 'Tom', 'Goldie', 'Sheldon'];
+    const randomVillager = possibleVillagers[Math.floor(Math.random() * possibleVillagers.length)];
+
+    const genericDialogues = [
+        "Nice weather today, isn't it?",
+        "Have you found any good items lately?",
+        "I heard there's a rare bug around here somewhere.",
+        "Welcome to the village!",
+        "Hello there!",
+        "What brings you to this part of the village?",
+        "I'm just enjoying the peace and quiet.",
+        "Did you see that shooting star last night?",
+        "The flowers are blooming beautifully this season.",
+        "Have you been fishing recently?"
     ];
-    const dialogue = dialogues[Math.floor(Math.random() * dialogues.length)];
 
-    document.getElementById("output").innerText = `${villager}: "${dialogue}"`;
-  }
+    const villagerDialogues = {
+        'Bob': ["Hey there, buddy!", "Catch any good fish lately, pal?", "This village is the best, you know?", "Need any tips on relaxing?", "Keep it cool!"],
+        'Alice': ["Oh, hello dear!", "Have you seen my watering can anywhere?", "The garden needs tending to, you know.", "Would you like some tea sometime?", "Take care, sweetie."],
+        'Charlie': ["Greetings.", "I'm contemplating the mysteries of the universe.", "Have you observed the migratory patterns of the local birds?", "Knowledge is a powerful tool.", "Farewell."],
+        'Daisy': ["Woof woof!", "Did you bring any treats?", "Let's play fetch!", "I love belly rubs!", "*happy tail wags*"],
+        'Patches': ["Mrow?", "Have you seen any yarn balls around?", "A nap sounds wonderful right now.", "*purrs*", "Don't touch my favorite spot!"],
+        'Poppy': ["Cheep cheep!", "Look at the pretty flowers!", "I love to sing!", "Let's build a nest!", "Seeds are yummy!"],
+        'Rosie': ["Hello! How are you today?", "Isn't this village lovely?", "I enjoy chatting with everyone.", "What have you been up to?", "Have a wonderful day!"],
+        'Tom': ["Yo.", "Anything interesting happening?", "Leave me alone, I'm trying to think.", "Whatever.", "See ya."],
+        'Goldie': ["Bow-wow! Hi there!", "Let's go for a walk!", "Have you seen any squirrels?", "I love making new friends!", "Come visit me anytime!"],
+        'Sheldon': ["Greetings, citizen!", "Have you completed your daily exercises?", "Physical fitness is important!", "One must always strive for peak performance!", "Stay strong!"]
+    };
 
-  function checkInventory() {
-    const inventoryText = gameState.inventory.length ? gameState.inventory.join(", ") : "Your inventory is empty.";
-    document.getElementById("output").innerText = `Inventory: ${inventoryText}`;
-  }
-
-  function visitShop() {
-    if (gameState.location !== "Village Square") {
-      document.getElementById("output").innerText = "You need to be in the Village Square to visit the shop.";
-      return;
-    }
-
-    if (gameState.inventory.length === 0) {
-      document.getElementById("output").innerText = "You have nothing to sell.";
-      return;
-    }
-
-    let earnings = 0;
-    gameState.inventory.forEach(item => {
-      earnings += item.includes("Golden") ? 50 : 10; // Golden items are worth more
-    });
-    gameState.currency += earnings;
-    gameState.inventory = [];
-
-    document.getElementById("output").innerText = `You sold your items for ${earnings} currency!`;
-    updateStatus();
-  }
-
-  function visitLocation(location) {
-    gameState.location = location;
-    document.getElementById("output").innerText = `You are now at the ${location}.`;
-  }
-
-  function unlockFishingRod() {
-    gameState.upgrades.fishingRod = true;
-    document.getElementById("output").innerText += "\nYou unlocked a new Fishing Rod! Your chances of catching fish have improved.";
-  }
-
-  function relaxAtHome() {
-    if (gameState.location !== "Home") {
-      document.getElementById("output").innerText = "You need to be at home to relax.";
-      return;
-    }
-
-    gameState.time = "Morning";
-    gameState.day += 1;
-    document.getElementById("output").innerText = "You feel refreshed! A new day begins.";
-    updateStatus();
-  }
-
-  function saveGame() {
-    localStorage.setItem("VillageChroniclesSave", JSON.stringify(gameState));
-    document.getElementById("output").innerText = "Game saved successfully!";
-  }
-
-  function loadGame() {
-    const savedData = localStorage.getItem("VillageChroniclesSave");
-    if (savedData) {
-      gameState = JSON.parse(savedData);
-      updateStatus();
-      document.getElementById("output").innerText = "Game loaded successfully!";
+    let dialogue;
+    if (villagerDialogues.hasOwnProperty(randomVillager)) {
+        dialogue = villagerDialogues[randomVillager][Math.floor(Math.random() * villagerDialogues[randomVillager].length)];
     } else {
-      document.getElementById("output").innerText = "No saved game found.";
+        dialogue = genericDialogues[Math.floor(Math.random() * genericDialogues.length)];
     }
-  }
 
-  window.onload = loadGame;
+    outputMessage(`${randomVillager} says: "${dialogue}"`, 'info');
+}
+
+function checkShop() {
+    outputMessage("Welcome to the Shop!", 'info');
+    outputMessage("Available items for purchase:", 'info');
+    for (const item in shopInventory) {
+        outputMessage(`- ${item}: ${shopInventory[item]} Bells`, 'info');
+    }
+}
+
+function visitShopPrompt() {
+    const itemToBuy = prompt("What would you like to buy? (Type 'check' to see shop inventory)");
+    if (!itemToBuy) return;
+
+    if (itemToBuy.toLowerCase() === 'check') {
+        checkShop();
+        return;
+    }
+
+    if (shopInventory.hasOwnProperty(itemToBuy)) {
+        const quantityToBuy = parseInt(prompt(`How many ${itemToBuy}(s) would you like to buy?`), 10);
+        if (isNaN(quantityToBuy) || quantityToBuy <= 0) {
+            outputMessage("Invalid quantity.", 'negative');
+            return;
+        }
+
+        const pricePerItem = shopInventory[itemToBuy];
+        const totalPrice = pricePerItem * quantityToBuy;
+
+        if (gameState.bells >= totalPrice) {
+            gameState.bells -= totalPrice;
+            if (itemToBuy.includes('Rod')) {
+                gameState.fishingRod = { type: itemToBuy, durability: rodTypes[itemToBuy].durability };
+                outputMessage(`You bought a ${itemToBuy}!`, 'positive');
+            } else if (itemToBuy.includes('Net')) {
+                gameState.bugNet = { type: itemToBuy, durability: netTypes[itemToBuy].durability };
+                outputMessage(`You bought a ${itemToBuy}!`, 'positive');
+            } else {
+                gameState.inventory[itemToBuy] = (gameState.inventory[itemToBuy] || 0) + quantityToBuy;
+                outputMessage(`You bought ${quantityToBuy} ${itemToBuy}(s)!`, 'positive');
+            }
+            updateDisplay();
+        } else {
+            outputMessage("Not enough Bells!", 'negative');
+        }
+    } else {
+        outputMessage("Sorry, we don't have that item in stock.", 'negative');
+    }
+}
+
+function showHelp() {
+    outputMessage("Welcome to Village Chronicles!", 'info');
+    outputMessage("Explore your village, collect items, fish, catch bugs, and chat with villagers.", 'info');
+    outputMessage("Available actions:", 'info');
+    outputMessage("- **Forage:** Find random items in the village.", 'info');
+    outputMessage("- **Fish:** Try to catch fish using a fishing rod.", 'info');
+    outputMessage("- **Catch Bugs:** Try to catch bugs using a bug net.", 'info');
+    outputMessage("- **Inventory:** Check the items you have collected and your tools.", 'info');
+    outputMessage("- **Sell Item(s):** Sell your collected items for Bells.", 'info');
+    outputMessage("- **Talk to Villager:** Interact with the residents of the village.", 'info');
+    outputMessage("- **Visit Shop:** Buy tools and other items.", 'info');
+    outputMessage("- **Check Shop:** See what items are available for purchase.", 'info');
+    outputMessage("- **Save Game:** Manually save your current progress.", 'info');
+    outputMessage("Your progress is saved to your browser's local storage.", 'info');
+}
+
+// Load the game when the page loads
+window.onload = loadGame;
