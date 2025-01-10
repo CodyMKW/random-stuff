@@ -47,7 +47,7 @@ const shopInventory = {
 };
 
 const possibleVillagers = ['Bob', 'Alice', 'Charlie', 'Daisy', 'Patches', 'Poppy', 'Rosie', 'Tom', 'Goldie', 'Sheldon', 'Fauna', 'Apollo', 'Marshal', 'Stitches', 'Ankha'];
-const possibleGiftItems = ['Flower', 'Shell', 'Apples', 'Pears', ' Cherries ', 'Oranges', 'Grapes', 'Mushroom'];
+const possibleGiftItems = ['Flower', 'Shell', 'Apples', 'Pears', 'Cherries', 'Oranges', 'Grapes', 'Mushroom'];
 const possibleThankYouGifts = ['Bells Pouch', 'Rare Flower', 'Sea Shell', 'Polished Pebble', 'Design Sketch', 'Virtual Boy', 'GameBoy Advance', 'GameCube', 'GameBoy', 'DS', '3DS', 'New 3DS', 'Wii', 'Wii U', 'Nintendo Switch', 'Nintendo Switch 2'];
 const possibleHybridFlowers = ['Pink Roses', 'Orange Roses', 'Black Roses', 'Purple Roses', 'Blue Roses', 'Pink Cosmos', 'Orange Cosmos', 'Black Cosmos', 'Pink Tulips', 'Orange Tulips', 'Purple Tulips', 'Black Tulips', 'Pink Lilies', 'Orange Lilies', 'Black Lilies', 'Pink Hyacinths', 'Orange Hyacinths', 'Purple Hyacinths', 'Blue Hyacinths', 'Pink Windflowers', 'Orange Windflowers', 'Purple Windflowers', 'Blue Windflowers', 'Green Mums', 'Purple Pansies', 'Blue Pansies'];
 
@@ -92,7 +92,7 @@ function outputMessage(message, type = '') {
 
 // Game actions
 function forage() {
-    const possibleItems = ['Apples', 'Pears', ' Cherries ', 'Oranges', 'Grapes', 'Twig', 'Stone', 'Flower', 'Mushroom', 'Shell', 'Feather', 'Acorn', 'Pine Cone'];
+    const possibleItems = ['Apples', 'Pears', 'Cherries', 'Oranges', 'Grapes', 'Twig', 'Stone', 'Flower', 'Mushroom', 'Shell', 'Feather', 'Acorn', 'Pine Cone'];
     const randomItem = possibleItems[Math.floor(Math.random() * possibleItems.length)];
     gameState.inventory[randomItem] = (gameState.inventory[randomItem] || 0) + 1;
     outputMessage(`You found a ${randomItem}!`, 'positive');
