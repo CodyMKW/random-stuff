@@ -27,11 +27,17 @@ const netTypes = {
 const shopInventory = {
     'Basic Rod': 100, 'Sturdy Rod': 250, 'Pro Rod': 500,
     'Basic Net': 80, 'Sturdy Net': 200, 'Pro Net': 400,
-    'Medicine': 150 // Added Medicine
+    'Medicine': 150,
+    'Shovel': 200,
+    'Axe': 250,
+    'Watering Can': 180,
+    'Flower Seeds': 50,
+    'Tree Sapling': 300
 };
 
-const possibleVillagers = ['Bob', 'Alice', 'Charlie', 'Daisy', 'Patches', 'Poppy', 'Rosie', 'Tom', 'Goldie', 'Sheldon'];
-const possibleGiftItems = ['Berry', 'Flower', 'Shell'];
+const possibleVillagers = ['Bob', 'Alice', 'Charlie', 'Daisy', 'Patches', 'Poppy', 'Rosie', 'Tom', 'Goldie', 'Sheldon', 'Fauna', 'Apollo', 'Marshal', 'Stitches', 'Ankha'];
+const possibleGiftItems = ['Berry', 'Flower', 'Shell', 'Fruit', 'Mushroom'];
+const possibleThankYouGifts = ['Bells Pouch', 'Rare Flower', 'Sea Shell', 'Polished Pebble', 'Design Sketch'];
 
 // Function to save the game state to local storage
 function saveGame() {
@@ -74,7 +80,7 @@ function outputMessage(message, type = '') {
 
 // Game actions
 function forage() {
-    const possibleItems = ['Berry', 'Twig', 'Stone', 'Flower', 'Mushroom', 'Shell', 'Feather'];
+    const possibleItems = ['Berry', 'Twig', 'Stone', 'Flower', 'Mushroom', 'Shell', 'Feather', 'Acorn', 'Pine Cone'];
     const randomItem = possibleItems[Math.floor(Math.random() * possibleItems.length)];
     gameState.inventory[randomItem] = (gameState.inventory[randomItem] || 0) + 1;
     outputMessage(`You found a ${randomItem}!`, 'positive');
@@ -87,20 +93,33 @@ function fish() {
         return;
     }
 
-    gameState.fishingRod.durability--;
-    if (gameState.fishingRod.durability <= 0) {
-        outputMessage(`Your ${gameState.fishingRod.type} broke!`, 'negative');
-        gameState.fishingRod = null;
-        updateDisplay();
-        return;
+    if (gameState.fishingRod) { // Add this check
+        gameState.fishingRod.durability--;
+        if (gameState.fishingRod.durability <= 0) {
+            outputMessage(`Your ${gameState.fishingRod.type} broke!`, 'negative');
+            gameState.fishingRod = null;
+            updateDisplay();
+            return;
+        }
     }
 
     const rarityChance = Math.random();
-    let caughtFish = 'Tiny Fish';
-    if (gameState.fishingRod.type === 'Basic Rod' && rarityChance > 0.7) caughtFish = 'Small Fish';
-    if (gameState.fishingRod.type === 'Sturdy Rod' && rarityChance > 0.5) caughtFish = 'Medium Fish';
-    if (gameState.fishingRod.type === 'Pro Rod' && rarityChance > 0.3) caughtFish = 'Large Fish';
-    if (gameState.fishingRod.type === 'Pro Rod' && rarityChance > 0.85) caughtFish = 'Rare Fish';
+    let caughtFish = 'Dace';
+    if (gameState.fishingRod && gameState.fishingRod.type === 'Basic Rod') {
+        if (rarityChance > 0.7) caughtFish = 'Pond Smelt';
+        if (rarityChance > 0.9) caughtFish = 'Crucian Carp';
+    }
+    if (gameState.fishingRod && gameState.fishingRod.type === 'Sturdy Rod') {
+        if (rarityChance > 0.5) caughtFish = 'Barbel Steed';
+        if (rarityChance > 0.8) caughtFish = 'Pale Chub';
+        if (rarityChance > 0.95) caughtFish = 'Soft-shell Turtle';
+    }
+    if (gameState.fishingRod && gameState.fishingRod.type === 'Pro Rod') {
+        if (rarityChance > 0.3) caughtFish = 'Black Bass';
+        if (rarityChance > 0.6) caughtFish = 'Tilapia';
+        if (rarityChance > 0.85) caughtFish = 'Red Snapper';
+        if (rarityChance > 0.97) caughtFish = 'Stringfish';
+    }
 
     outputMessage(`You caught a ${caughtFish}!`, 'positive');
     gameState.inventory[caughtFish] = (gameState.inventory[caughtFish] || 0) + 1;
@@ -113,20 +132,33 @@ function catchBugs() {
         return;
     }
 
-    gameState.bugNet.durability--;
-    if (gameState.bugNet.durability <= 0) {
-        outputMessage(`Your ${gameState.bugNet.type} broke!`, 'negative');
-        gameState.bugNet = null;
-        updateDisplay();
-        return;
+    if (gameState.bugNet) { // Add this check
+        gameState.bugNet.durability--;
+        if (gameState.bugNet.durability <= 0) {
+            outputMessage(`Your ${gameState.bugNet.type} broke!`, 'negative');
+            gameState.bugNet = null;
+            updateDisplay();
+            return;
+        }
     }
 
     const rarityChance = Math.random();
     let caughtBug = 'Common Butterfly';
-    if (gameState.bugNet.type === 'Basic Net' && rarityChance > 0.7) caughtBug = 'Grasshopper';
-    if (gameState.bugNet.type === 'Sturdy Net' && rarityChance > 0.5) caughtBug = 'Monarch Butterfly';
-    if (gameState.bugNet.type === 'Pro Net' && rarityChance > 0.3) caughtBug = 'Mantis';
-    if (gameState.bugNet.type === 'Pro Net' && rarityChance > 0.85) caughtBug = 'Rare Beetle';
+    if (gameState.bugNet && gameState.bugNet.type === 'Basic Net') {
+        if (rarityChance > 0.7) caughtBug = 'Honeybee';
+        if (rarityChance > 0.9) caughtBug = 'Yellow Butterfly';
+    }
+    if (gameState.bugNet && gameState.bugNet.type === 'Sturdy Net') {
+        if (rarityChance > 0.5) caughtBug = 'Monarch Butterfly';
+        if (rarityChance > 0.8) caughtBug = 'Grasshopper';
+        if (rarityChance > 0.95) caughtBug = 'Ladybug';
+    }
+    if (gameState.bugNet && gameState.bugNet.type === 'Pro Net') {
+        if (rarityChance > 0.3) caughtBug = 'Mantis';
+        if (rarityChance > 0.6) caughtBug = 'Orchid Mantis';
+        if (rarityChance > 0.85) caughtBug = 'Peacock Butterfly';
+        if (rarityChance > 0.97) caughtBug = 'Atlas Moth';
+    }
 
     outputMessage(`You caught a ${caughtBug}!`, 'positive');
     gameState.inventory[caughtBug] = (gameState.inventory[caughtBug] || 0) + 1;
@@ -218,6 +250,27 @@ function giftItemPrompt() {
     updateDisplay();
 }
 
+function giveMedicine(villagerName) {
+    if (!gameState.inventory['Medicine'] || gameState.inventory['Medicine'] <= 0) {
+        outputMessage("You don't have any medicine!", 'negative');
+        return;
+    }
+
+    gameState.inventory['Medicine']--;
+    if (gameState.inventory['Medicine'] === 0) {
+        delete gameState.inventory['Medicine'];
+    }
+
+    const thankYouGift = possibleThankYouGifts[Math.floor(Math.random() * possibleThankYouGifts.length)];
+    gameState.inventory[thankYouGift] = (gameState.inventory[thankYouGift] || 0) + 1;
+    gameState.currentEvent = null; // Villager is no longer sick
+
+    outputMessage(`You gave medicine to ${villagerName}.`, 'positive');
+    outputMessage(`${villagerName} says, "Oh, thank you so much, ${gameState.playerName}! I feel much better now. Here, take this as a token of my gratitude."`, 'positive');
+    outputMessage(`Received ${thankYouGift}!`, 'positive');
+    updateDisplay();
+}
+
 function talkToVillager() {
     const randomVillager = possibleVillagers[Math.floor(Math.random() * possibleVillagers.length)];
     const playerName = gameState.playerName; // For easier use in dialogue
@@ -232,7 +285,12 @@ function talkToVillager() {
         "I'm just enjoying the peace and quiet.",
         "Did you see that shooting star last night?",
         "The flowers are blooming beautifully this season.",
-        "Have you been fishing recently?"
+        "Have you been fishing recently?",
+        "I'm thinking of redecorating my house.",
+        "This village is such a lovely place to live.",
+        "Do you have any hobbies, ${playerName}?",
+        "It's always nice to see a friendly face.",
+        "I'm trying to learn a new song."
     ];
 
     const villagerDialogues = {
@@ -241,70 +299,150 @@ function talkToVillager() {
             "Catch any good fish lately, pal?",
             "This village is the best, you know?",
             "Need any tips on relaxing?",
-            "Keep it cool!"
+            "Keep it cool!",
+            "Got any snacks on ya?",
+            "Life's a beach!",
+            "Hang loose!"
         ],
         'Alice': [
             `Oh, hello dear, ${playerName}!`,
             "Have you seen my watering can anywhere?",
             "The garden needs tending to, you know.",
             "Would you like some tea sometime?",
-            "Take care, sweetie."
+            "Take care, sweetie.",
+            "Did you remember to water your plants?",
+            "A little sunshine makes everything better.",
+            "Have you seen the new flowers blooming?"
         ],
         'Charlie': [
             `Greetings, ${playerName}.`,
             "I'm contemplating the mysteries of the universe.",
             "Have you observed the migratory patterns of the local birds?",
             "Knowledge is a powerful tool.",
-            "Farewell."
+            "Farewell.",
+            "The stars have much to tell us.",
+            "What is the meaning of it all?",
+            "Ponder this..."
         ],
         'Daisy': [
             "Woof woof!",
             `Did you bring any treats, ${playerName}?`,
             "Let's play fetch!",
             "I love belly rubs!",
-            "*happy tail wags*"
+            "*happy tail wags*",
+            "Walkies?",
+            "Squirrel!",
+            "Good boy, good girl!"
         ],
         'Patches': [
             "Mrow?",
             "Have you seen any yarn balls around?",
             "A nap sounds wonderful right now.",
             "*purrs*",
-            "Don't touch my favorite spot!"
+            "Don't touch my favorite spot!",
+            "Can I have some fish?",
+            "Where's the sunbeam?",
+            "Hissss... just kidding!"
         ],
         'Poppy': [
             "Cheep cheep!",
             `Look at the pretty flowers, ${playerName}!`,
             "I love to sing!",
             "Let's build a nest!",
-            "Seeds are yummy!"
+            "Seeds are yummy!",
+            "Have you seen any worms?",
+            "The sky is so blue today!",
+            "Tweet tweet!"
         ],
         'Rosie': [
             `Hello, ${playerName}! How are you today?`,
             "Isn't this village lovely?",
             "I enjoy chatting with everyone.",
             "What have you been up to?",
-            "Have a wonderful day!"
+            "Have a wonderful day!",
+            "Let's have a picnic!",
+            "Have you visited the museum?",
+            "It's a beautiful day for a stroll."
         ],
         'Tom': [
             "Yo.",
             "Anything interesting happening?",
             "Leave me alone, I'm trying to think.",
             "Whatever.",
-            "See ya."
+            "See ya.",
+            "Don't bother me.",
+            "...",
+            "Huh?"
         ],
         'Goldie': [
             `Bow-wow! Hi there, ${playerName}!`,
             "Let's go for a walk!",
             "Have you seen any squirrels?",
             "I love making new friends!",
-            "Come visit me anytime!"
+            "Come visit me anytime!",
+            "Wanna play tag?",
+            "My tail wags for you!",
+            "Sniff sniff!"
         ],
         'Sheldon': [
             `Greetings, citizen, ${playerName}!`,
             "Have you completed your daily exercises?",
             "Physical fitness is important!",
             "One must always strive for peak performance!",
-            "Stay strong!"
+            "Stay strong!",
+            "Push it to the limit!",
+            "Feel the burn!",
+            "No pain, no gain!"
+        ],
+        'Fauna': [
+            `Oh, hello! It's so nice to see you, ${playerName}!`,
+            "Have you been enjoying the forest lately?",
+            "The trees are so peaceful, aren't they?",
+            "Would you like to go for a walk in the woods?",
+            "Be careful not to step on any mushrooms!",
+            "The birds have such lovely songs here.",
+            "Let's gather some berries!",
+            "Isn't nature wonderful?"
+        ],
+        'Apollo': [
+            `Well, well, if it isn't ${playerName}.`,
+            "What brings you to my neck of the woods?",
+            "The sky's the limit, kid.",
+            "Don't waste my time.",
+            "Hmph.",
+            "Show some respect.",
+            "Got a problem?",
+            "Keep it moving."
+        ],
+        'Marshal': [
+            `Oh, um, hi ${playerName}...`,
+            "...",
+            "Did you need something?",
+            "It's... nice to see you.",
+            "...",
+            "Don't stare.",
+            "Leave me alone.",
+            "Go away."
+        ],
+        'Stitches': [
+            "Grumble... hello...",
+            "Want to play... forever?",
+            "Can we be... best friends?",
+            "Hug?",
+            "...",
+            "Playtime!",
+            "Candy?",
+            "Sleepy..."
+        ],
+        'Ankha': [
+            `Greetings, ${playerName}.`,
+            "Have you brought tribute?",
+            "The sands of time slip away.",
+            "Speak quickly.",
+            "I have no time for games.",
+            "Kneel before me.",
+            "My wisdom is vast.",
+            "Do not test my patience."
         ]
     };
 
@@ -332,6 +470,15 @@ function talkToVillager() {
         // Add more event types here
     } else if (gameState.currentEvent && gameState.currentEvent.type === 'sick' && gameState.currentEvent.villager === randomVillager) {
         dialogue += `\n${randomVillager} says, "Oh, I still feel a bit under the weather..."`;
+        if (gameState.inventory['Medicine'] > 0) {
+            const giveMedicinePrompt = prompt(`${randomVillager} looks sick. Do you want to give them medicine? (yes/no)`);
+            if (giveMedicinePrompt && giveMedicinePrompt.toLowerCase() === 'yes') {
+                giveMedicine(randomVillager);
+                return; // Exit talkToVillager to avoid further dialogue
+            }
+        } else {
+            dialogue += ` "If only I had some medicine..."`;
+        }
     }
 
     outputMessage(`${randomVillager} says: "${dialogue}"`, 'info');
