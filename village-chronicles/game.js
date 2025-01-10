@@ -38,7 +38,7 @@ const shopInventory = {
 };
 
 const possibleVillagers = ['Bob', 'Alice', 'Charlie', 'Daisy', 'Patches', 'Poppy', 'Rosie', 'Tom', 'Goldie', 'Sheldon', 'Fauna', 'Apollo', 'Marshal', 'Stitches', 'Ankha'];
-const possibleGiftItems = ['Berry', 'Flower', 'Shell', 'Fruit', 'Mushroom'];
+const possibleGiftItems = ['Flower', 'Shell', 'Apples', 'Pears', ' Cherries ', 'Oranges', 'Grapes', 'Mushroom'];
 const possibleThankYouGifts = ['Bells Pouch', 'Rare Flower', 'Sea Shell', 'Polished Pebble', 'Design Sketch', 'Virtual Boy', 'GameBoy Advance', 'GameCube', 'GameBoy', 'DS', '3DS', 'New 3DS', 'Wii', 'Wii U', 'Nintendo Switch', 'Nintendo Switch 2'];
 
 // Function to save the game state to local storage
@@ -82,7 +82,7 @@ function outputMessage(message, type = '') {
 
 // Game actions
 function forage() {
-    const possibleItems = ['Berry', 'Twig', 'Stone', 'Flower', 'Mushroom', 'Shell', 'Feather', 'Acorn', 'Pine Cone'];
+    const possibleItems = ['Apples', 'Pears', ' Cherries ', 'Oranges', 'Grapes', 'Twig', 'Stone', 'Flower', 'Mushroom', 'Shell', 'Feather', 'Acorn', 'Pine Cone'];
     const randomItem = possibleItems[Math.floor(Math.random() * possibleItems.length)];
     gameState.inventory[randomItem] = (gameState.inventory[randomItem] || 0) + 1;
     outputMessage(`You found a ${randomItem}!`, 'positive');
