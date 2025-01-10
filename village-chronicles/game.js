@@ -39,7 +39,7 @@ const shopInventory = {
 
 const possibleVillagers = ['Bob', 'Alice', 'Charlie', 'Daisy', 'Patches', 'Poppy', 'Rosie', 'Tom', 'Goldie', 'Sheldon', 'Fauna', 'Apollo', 'Marshal', 'Stitches', 'Ankha'];
 const possibleGiftItems = ['Berry', 'Flower', 'Shell', 'Fruit', 'Mushroom'];
-const possibleThankYouGifts = ['Bells Pouch', 'Rare Flower', 'Sea Shell', 'Polished Pebble', 'Design Sketch'];
+const possibleThankYouGifts = ['Bells Pouch', 'Rare Flower', 'Sea Shell', 'Polished Pebble', 'Design Sketch', 'Virtual Boy', 'GameBoy Advance', 'GameCube', 'GameBoy', 'DS', '3DS', 'New 3DS', 'Wii', 'Wii U', 'Nintendo Switch', 'Nintendo Switch 2'];
 
 // Function to save the game state to local storage
 function saveGame() {
