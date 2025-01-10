@@ -100,7 +100,7 @@ function fish() {
     if (gameState.fishingRod.type === 'Basic Rod' && rarityChance > 0.7) caughtFish = 'Small Fish';
     if (gameState.fishingRod.type === 'Sturdy Rod' && rarityChance > 0.5) caughtFish = 'Medium Fish';
     if (gameState.fishingRod.type === 'Pro Rod' && rarityChance > 0.3) caughtFish = 'Large Fish';
-    if (gameState.fishingRod.type === 'Pro Rod' && rarityChance > 0.85) caughtFish = 'Rare Fish!';
+    if (gameState.fishingRod.type === 'Pro Rod' && rarityChance > 0.85) caughtFish = 'Rare Fish';
 
     outputMessage(`You caught a ${caughtFish}!`, 'positive');
     gameState.inventory[caughtFish] = (gameState.inventory[caughtFish] || 0) + 1;
