@@ -8,7 +8,8 @@ let gameState = {
     inventory: {},
     fishingRod: null,
     bugNet: null,
-    lastSave: Date.now()
+    lastSave: Date.now(),
+    currentEvent: null // To track ongoing events
 };
 
 const rodTypes = {
@@ -24,13 +25,13 @@ const netTypes = {
 };
 
 const shopInventory = {
-    'Basic Rod': 100,
-    'Sturdy Rod': 250,
-    'Pro Rod': 500,
-    'Basic Net': 80,
-    'Sturdy Net': 200,
-    'Pro Net': 400
+    'Basic Rod': 100, 'Sturdy Rod': 250, 'Pro Rod': 500,
+    'Basic Net': 80, 'Sturdy Net': 200, 'Pro Net': 400,
+    'Medicine': 150 // Added Medicine
 };
+
+const possibleVillagers = ['Bob', 'Alice', 'Charlie', 'Daisy', 'Patches', 'Poppy', 'Rosie', 'Tom', 'Goldie', 'Sheldon'];
+const possibleGiftItems = ['Berry', 'Flower', 'Shell'];
 
 // Function to save the game state to local storage
 function saveGame() {
@@ -190,15 +191,42 @@ function sellItem() {
     updateDisplay();
 }
 
+function giftItemPrompt() {
+    const inventoryItems = Object.keys(gameState.inventory);
+    if (inventoryItems.length === 0) {
+        outputMessage("Your inventory is empty. Nothing to gift.", 'info');
+        return;
+    }
+    const itemToGift = prompt(`What item do you want to gift? (Available: ${inventoryItems.join(', ')})`);
+    if (!itemToGift || !gameState.inventory.hasOwnProperty(itemToGift)) {
+        outputMessage("Invalid item.", 'negative');
+        return;
+    }
+    const quantityToGift = parseInt(prompt(`How many ${itemToGift}(s) do you want to gift?`), 10);
+    if (isNaN(quantityToGift) || quantityToGift <= 0 || quantityToGift > gameState.inventory[itemToGift]) {
+        outputMessage("Invalid quantity.", 'negative');
+        return;
+    }
+    const villagerToGift = prompt(`Which villager do you want to gift ${quantityToGift} ${itemToGift}(s) to? (${possibleVillagers.join(', ')})`);
+    if (!villagerToGift || !possibleVillagers.includes(villagerToGift)) {
+        outputMessage("Invalid villager.", 'negative');
+        return;
+    }
+    gameState.inventory[itemToGift] -= quantityToGift;
+    if (gameState.inventory[itemToGift] === 0) delete gameState.inventory[itemToGift];
+    outputMessage(`You gifted ${quantityToGift} ${itemToGift}(s) to ${villagerToGift}.`, 'positive');
+    updateDisplay();
+}
+
 function talkToVillager() {
-    const possibleVillagers = ['Bob', 'Alice', 'Charlie', 'Daisy', 'Patches', 'Poppy', 'Rosie', 'Tom', 'Goldie', 'Sheldon'];
     const randomVillager = possibleVillagers[Math.floor(Math.random() * possibleVillagers.length)];
+    const playerName = gameState.playerName; // For easier use in dialogue
 
     const genericDialogues = [
-        "Nice weather today, isn't it?",
+        `Nice weather today, isn't it, ${playerName}?`,
         "Have you found any good items lately?",
         "I heard there's a rare bug around here somewhere.",
-        "Welcome to the village!",
+        `Welcome to the village, ${playerName}!`,
         "Hello there!",
         "What brings you to this part of the village?",
         "I'm just enjoying the peace and quiet.",
@@ -208,16 +236,76 @@ function talkToVillager() {
     ];
 
     const villagerDialogues = {
-        'Bob': ["Hey there, buddy!", "Catch any good fish lately, pal?", "This village is the best, you know?", "Need any tips on relaxing?", "Keep it cool!"],
-        'Alice': ["Oh, hello dear!", "Have you seen my watering can anywhere?", "The garden needs tending to, you know.", "Would you like some tea sometime?", "Take care, sweetie."],
-        'Charlie': ["Greetings.", "I'm contemplating the mysteries of the universe.", "Have you observed the migratory patterns of the local birds?", "Knowledge is a powerful tool.", "Farewell."],
-        'Daisy': ["Woof woof!", "Did you bring any treats?", "Let's play fetch!", "I love belly rubs!", "*happy tail wags*"],
-        'Patches': ["Mrow?", "Have you seen any yarn balls around?", "A nap sounds wonderful right now.", "*purrs*", "Don't touch my favorite spot!"],
-        'Poppy': ["Cheep cheep!", "Look at the pretty flowers!", "I love to sing!", "Let's build a nest!", "Seeds are yummy!"],
-        'Rosie': ["Hello! How are you today?", "Isn't this village lovely?", "I enjoy chatting with everyone.", "What have you been up to?", "Have a wonderful day!"],
-        'Tom': ["Yo.", "Anything interesting happening?", "Leave me alone, I'm trying to think.", "Whatever.", "See ya."],
-        'Goldie': ["Bow-wow! Hi there!", "Let's go for a walk!", "Have you seen any squirrels?", "I love making new friends!", "Come visit me anytime!"],
-        'Sheldon': ["Greetings, citizen!", "Have you completed your daily exercises?", "Physical fitness is important!", "One must always strive for peak performance!", "Stay strong!"]
+        'Bob': [
+            `Hey there, buddy, ${playerName}!`,
+            "Catch any good fish lately, pal?",
+            "This village is the best, you know?",
+            "Need any tips on relaxing?",
+            "Keep it cool!"
+        ],
+        'Alice': [
+            `Oh, hello dear, ${playerName}!`,
+            "Have you seen my watering can anywhere?",
+            "The garden needs tending to, you know.",
+            "Would you like some tea sometime?",
+            "Take care, sweetie."
+        ],
+        'Charlie': [
+            `Greetings, ${playerName}.`,
+            "I'm contemplating the mysteries of the universe.",
+            "Have you observed the migratory patterns of the local birds?",
+            "Knowledge is a powerful tool.",
+            "Farewell."
+        ],
+        'Daisy': [
+            "Woof woof!",
+            `Did you bring any treats, ${playerName}?`,
+            "Let's play fetch!",
+            "I love belly rubs!",
+            "*happy tail wags*"
+        ],
+        'Patches': [
+            "Mrow?",
+            "Have you seen any yarn balls around?",
+            "A nap sounds wonderful right now.",
+            "*purrs*",
+            "Don't touch my favorite spot!"
+        ],
+        'Poppy': [
+            "Cheep cheep!",
+            `Look at the pretty flowers, ${playerName}!`,
+            "I love to sing!",
+            "Let's build a nest!",
+            "Seeds are yummy!"
+        ],
+        'Rosie': [
+            `Hello, ${playerName}! How are you today?`,
+            "Isn't this village lovely?",
+            "I enjoy chatting with everyone.",
+            "What have you been up to?",
+            "Have a wonderful day!"
+        ],
+        'Tom': [
+            "Yo.",
+            "Anything interesting happening?",
+            "Leave me alone, I'm trying to think.",
+            "Whatever.",
+            "See ya."
+        ],
+        'Goldie': [
+            `Bow-wow! Hi there, ${playerName}!`,
+            "Let's go for a walk!",
+            "Have you seen any squirrels?",
+            "I love making new friends!",
+            "Come visit me anytime!"
+        ],
+        'Sheldon': [
+            `Greetings, citizen, ${playerName}!`,
+            "Have you completed your daily exercises?",
+            "Physical fitness is important!",
+            "One must always strive for peak performance!",
+            "Stay strong!"
+        ]
     };
 
     let dialogue;
@@ -227,15 +315,26 @@ function talkToVillager() {
         dialogue = genericDialogues[Math.floor(Math.random() * genericDialogues.length)];
     }
 
-    outputMessage(`${randomVillager} says: "${dialogue}"`, 'info');
-}
-
-function checkShop() {
-    outputMessage("Welcome to the Shop!", 'info');
-    outputMessage("Available items for purchase:", 'info');
-    for (const item in shopInventory) {
-        outputMessage(`- ${item}: ${shopInventory[item]} Bells`, 'info');
+    // Chance to receive an item
+    if (Math.random() < 0.2) {
+        const giftedItem = possibleGiftItems[Math.floor(Math.random() * possibleGiftItems.length)];
+        gameState.inventory[giftedItem] = (gameState.inventory[giftedItem] || 0) + 1;
+        outputMessage(`${randomVillager} gave you a ${giftedItem}!`, 'positive');
+        updateDisplay();
     }
+
+    // Random events
+    if (Math.random() < 0.1) {
+        if (Math.random() < 0.5) {
+            gameState.currentEvent = { type: 'sick', villager: randomVillager };
+            dialogue += `\n${randomVillager} doesn't look too good. "Oh dear, I think I'm feeling a bit unwell."`;
+        }
+        // Add more event types here
+    } else if (gameState.currentEvent && gameState.currentEvent.type === 'sick' && gameState.currentEvent.villager === randomVillager) {
+        dialogue += `\n${randomVillager} says, "Oh, I still feel a bit under the weather..."`;
+    }
+
+    outputMessage(`${randomVillager} says: "${dialogue}"`, 'info');
 }
 
 function visitShopPrompt() {
@@ -278,6 +377,14 @@ function visitShopPrompt() {
     }
 }
 
+function checkShop() {
+    outputMessage("Welcome to the Shop!", 'info');
+    outputMessage("Available items for purchase:", 'info');
+    for (const item in shopInventory) {
+        outputMessage(`- ${item}: ${shopInventory[item]} Bells`, 'info');
+    }
+}
+
 function showHelp() {
     outputMessage("Welcome to Village Chronicles!", 'info');
     outputMessage("Explore your village, collect items, fish, catch bugs, and chat with villagers.", 'info');
@@ -288,6 +395,7 @@ function showHelp() {
     outputMessage("- **Inventory:** Check the items you have collected and your tools.", 'info');
     outputMessage("- **Sell Item(s):** Sell your collected items for Bells.", 'info');
     outputMessage("- **Talk to Villager:** Interact with the residents of the village.", 'info');
+    outputMessage("- **Gift Item:** Give an item to a villager.", 'info');
     outputMessage("- **Visit Shop:** Buy tools and other items.", 'info');
     outputMessage("- **Check Shop:** See what items are available for purchase.", 'info');
     outputMessage("- **Save Game:** Manually save your current progress.", 'info');
