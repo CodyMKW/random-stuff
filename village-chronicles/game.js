@@ -8,6 +8,9 @@ let gameState = {
     inventory: {},
     fishingRod: null,
     bugNet: null,
+    shovel: null,
+    axe: null,
+    wateringCan: null,
     lastSave: Date.now(),
     currentEvent: null // To track ongoing events
 };
@@ -26,6 +29,12 @@ const netTypes = {
     'Ultimate Net': { durability: 50000, price: 50000 }
 };
 
+const toolTypes = {
+    'Shovel': { durability: 30, price: 200 },
+    'Axe': { durability: 50, price: 250 },
+    'Watering Can': { durability: 20, price: 180 }
+}
+
 const shopInventory = {
     'Basic Rod': 100, 'Sturdy Rod': 250, 'Pro Rod': 500, 'Ultimate Rod': 50000,
     'Basic Net': 80, 'Sturdy Net': 200, 'Pro Net': 400, 'Ultimate Net': 50000,
@@ -40,6 +49,7 @@ const shopInventory = {
 const possibleVillagers = ['Bob', 'Alice', 'Charlie', 'Daisy', 'Patches', 'Poppy', 'Rosie', 'Tom', 'Goldie', 'Sheldon', 'Fauna', 'Apollo', 'Marshal', 'Stitches', 'Ankha'];
 const possibleGiftItems = ['Flower', 'Shell', 'Apples', 'Pears', ' Cherries ', 'Oranges', 'Grapes', 'Mushroom'];
 const possibleThankYouGifts = ['Bells Pouch', 'Rare Flower', 'Sea Shell', 'Polished Pebble', 'Design Sketch', 'Virtual Boy', 'GameBoy Advance', 'GameCube', 'GameBoy', 'DS', '3DS', 'New 3DS', 'Wii', 'Wii U', 'Nintendo Switch', 'Nintendo Switch 2'];
+const possibleHybridFlowers = ['Pink Roses', 'Orange Roses', 'Black Roses', 'Purple Roses', 'Blue Roses', 'Pink Cosmos', 'Orange Cosmos', 'Black Cosmos', 'Pink Tulips', 'Orange Tulips', 'Purple Tulips', 'Black Tulips', 'Pink Lilies', 'Orange Lilies', 'Black Lilies', 'Pink Hyacinths', 'Orange Hyacinths', 'Purple Hyacinths', 'Blue Hyacinths', 'Pink Windflowers', 'Orange Windflowers', 'Purple Windflowers', 'Blue Windflowers', 'Green Mums', 'Purple Pansies', 'Blue Pansies'];
 
 // Function to save the game state to local storage
 function saveGame() {
@@ -95,7 +105,7 @@ function fish() {
         return;
     }
 
-    if (gameState.fishingRod) { // Add this check
+    if (gameState.fishingRod) {
         gameState.fishingRod.durability--;
         if (gameState.fishingRod.durability <= 0) {
             outputMessage(`Your ${gameState.fishingRod.type} broke!`, 'negative');
@@ -140,7 +150,7 @@ function catchBugs() {
         return;
     }
 
-    if (gameState.bugNet) { // Add this check
+    if (gameState.bugNet) {
         gameState.bugNet.durability--;
         if (gameState.bugNet.durability <= 0) {
             outputMessage(`Your ${gameState.bugNet.type} broke!`, 'negative');
@@ -179,6 +189,95 @@ function catchBugs() {
     updateDisplay();
 }
 
+function hitRocks() {
+    if (!gameState.shovel) {
+        outputMessage("You need a shovel! Visit the shop to buy one.", 'negative');
+        return;
+    }
+    if (gameState.shovel) {
+        gameState.shovel.durability--;
+        if (gameState.shovel.durability <= 0) {
+            outputMessage("Your shovel broke!", 'negative');
+            gameState.shovel = null;
+            updateDisplay();
+            return;
+        }
+    }
+
+    const possibleItems = ['Stone', 'Iron Nugget', 'Iron Nugget', 'Iron Nugget', 'Bells', 'Gold Nugget'];
+    const rewards = {};
+    for (let i = 0; i < 8; i++) { // Rocks can be hit up to 8 times quickly
+        const randomItem = possibleItems[Math.floor(Math.random() * possibleItems.length)];
+        rewards[randomItem] = (rewards[randomItem] || 0) + 1;
+        if (randomItem === 'Bells') {
+            gameState.bells += 10 + Math.floor(Math.random() * 20); // Small amount of bells
+        }
+    }
+
+    let message = "You hit the rock and found: ";
+    let foundItems = [];
+    for (const item in rewards) {
+        if (item !== 'Bells') {
+            gameState.inventory[item] = (gameState.inventory[item] || 0) + rewards[item];
+            foundItems.push(`${rewards[item]} ${item}${rewards[item] > 1 ? 's' : ''}`);
+        }
+    }
+    if (rewards['Bells']) {
+        foundItems.push(`${rewards['Bells']} Bells`);
+    }
+
+    message += foundItems.join(', ');
+    outputMessage(message, 'positive');
+    updateDisplay();
+}
+
+function hitTrees() {
+    if (!gameState.axe) {
+        outputMessage("You need an axe! Visit the shop to buy one.", 'negative');
+        return;
+    }
+    if (gameState.axe) {
+        gameState.axe.durability--;
+        if (gameState.axe.durability <= 0) {
+            outputMessage("Your axe broke!", 'negative');
+            gameState.axe = null;
+            updateDisplay();
+            return;
+        }
+    }
+
+    const possibleItems = ['Wood', 'Softwood', 'Hardwood', 'Branch', 'Honeycomb'];
+    const randomItem = possibleItems[Math.floor(Math.random() * possibleItems.length)];
+    gameState.inventory[randomItem] = (gameState.inventory[randomItem] || 0) + 1;
+    outputMessage(`You hit the tree and got some ${randomItem}!`, 'positive');
+    updateDisplay();
+}
+
+function waterFlowers() {
+    if (!gameState.wateringCan) {
+        outputMessage("You need a watering can! Visit the shop to buy one.", 'negative');
+        return;
+    }
+    if (gameState.wateringCan) {
+        gameState.wateringCan.durability--;
+        if (gameState.wateringCan.durability <= 0) {
+            outputMessage("Your watering can broke!", 'negative');
+            gameState.wateringCan = null;
+            updateDisplay();
+            return;
+        }
+    }
+
+    if (Math.random() < 0.3) {
+        const randomFlower = possibleHybridFlowers[Math.floor(Math.random() * possibleHybridFlowers.length)];
+        gameState.inventory[randomFlower] = (gameState.inventory[randomFlower] || 0) + 1;
+        outputMessage(`You watered the flowers and a new ${randomFlower} grew!`, 'positive');
+    } else {
+        outputMessage("You watered the flowers.", 'positive');
+    }
+    updateDisplay();
+}
+
 function checkInventory() {
     outputMessage("Inventory:", 'info');
     for (const item in gameState.inventory) {
@@ -194,7 +293,22 @@ function checkInventory() {
     } else {
         outputMessage("- No bug net equipped.", 'info');
     }
-    if (Object.keys(gameState.inventory).length === 0 && !gameState.fishingRod && !gameState.bugNet) {
+    if (gameState.shovel) {
+        outputMessage(`- Shovel equipped (Durability: ${gameState.shovel.durability})`, 'info');
+    } else {
+        outputMessage("- No shovel equipped.", 'info');
+    }
+    if (gameState.axe) {
+        outputMessage(`- Axe equipped (Durability: ${gameState.axe.durability})`, 'info');
+    } else {
+        outputMessage("- No axe equipped.", 'info');
+    }
+    if (gameState.wateringCan) {
+        outputMessage(`- Watering Can equipped (Durability: ${gameState.wateringCan.durability})`, 'info');
+    } else {
+        outputMessage("- No watering can equipped.", 'info');
+    }
+    if (Object.keys(gameState.inventory).length === 0 && !gameState.fishingRod && !gameState.bugNet && !gameState.shovel && !gameState.axe && !gameState.wateringCan) {
         outputMessage("Your inventory is empty.", 'info');
     }
 }
@@ -525,7 +639,17 @@ function visitShopPrompt() {
             } else if (itemToBuy.includes('Net')) {
                 gameState.bugNet = { type: itemToBuy, durability: netTypes[itemToBuy].durability };
                 outputMessage(`You bought a ${itemToBuy}!`, 'positive');
-            } else {
+            } else if (itemToBuy === 'Shovel') {
+                gameState.shovel = { type: itemToBuy, durability: toolTypes['Shovel'].durability };
+                outputMessage(`You bought a ${itemToBuy}!`, 'positive');
+            } else if (itemToBuy === 'Axe') {
+                gameState.axe = { type: itemToBuy, durability: toolTypes['Axe'].durability };
+                outputMessage(`You bought an ${itemToBuy}!`, 'positive');
+            } else if (itemToBuy === 'Watering Can') {
+                gameState.wateringCan = { type: itemToBuy, durability: toolTypes['Watering Can'].durability };
+                outputMessage(`You bought a ${itemToBuy}!`, 'positive');
+            }
+            else {
                 gameState.inventory[itemToBuy] = (gameState.inventory[itemToBuy] || 0) + quantityToBuy;
                 outputMessage(`You bought ${quantityToBuy} ${itemToBuy}(s)!`, 'positive');
             }
@@ -553,6 +677,9 @@ function showHelp() {
     outputMessage("- **Forage:** Find random items in the village.", 'info');
     outputMessage("- **Fish:** Try to catch fish using a fishing rod.", 'info');
     outputMessage("- **Catch Bugs:** Try to catch bugs using a bug net.", 'info');
+    outputMessage("- **Hit Rocks:** Gather resources like stone and iron from rocks (requires a shovel).", 'info');
+    outputMessage("- **Hit Trees:** Get wood and other materials from trees (requires an axe).", 'info');
+    outputMessage("- **Water Flowers:**  Water your flowers, with a chance to grow hybrid varieties (requires a watering can).", 'info');
     outputMessage("- **Inventory:** Check the items you have collected and your tools.", 'info');
     outputMessage("- **Sell Item(s):** Sell your collected items for Bells.", 'info');
     outputMessage("- **Talk to Villager:** Interact with the residents of the village.", 'info');
