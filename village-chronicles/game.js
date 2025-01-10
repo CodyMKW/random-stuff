@@ -46,8 +46,81 @@ const shopInventory = {
     'Tree Sapling': 300
 };
 
+// --- ADDED SELL PRICES ---
+const sellPrices = {
+    'Apples': 50,
+    'Pears': 50,
+    'Cherries': 50,
+    'Oranges': 50,
+    'Grapes': 50,
+    'Apple': 30,
+    'Pear': 30,
+    'Cherry': 30,
+    'Orange': 30,
+    'Grape': 30,
+    'Twig': 5,
+    'Stone': 10,
+    'Flower': 20,
+    'Mushroom': 40,
+    'Shell': 30,
+    'Feather': 15,
+    'Acorn': 35,
+    'Pine Cone': 35,
+    'Sea Bass':10,
+    'Dace': 70,
+    'Pond Smelt': 100,
+    'Crucian Carp': 160,
+    'Barbel Steed': 200,
+    'Pale Chub': 130,
+    'Soft-shell Turtle': 375,
+    'Black Bass': 400,
+    'Tilapia': 180,
+    'Red Snapper': 3000,
+    'Stringfish': 15000,
+    'Napoleonfish': 10000,
+    'Shark': 15000,
+    'Dorado': 15000,
+    'Coelacanth': 20000,
+    'Common Butterfly': 160,
+    'Wasp': 250,
+    'Honeybee': 200,
+    'Yellow Butterfly': 160,
+    'Monarch Butterfly': 140,
+    'Grasshopper': 160,
+    'Ladybug': 200,
+    'Mantis': 430,
+    'Orchid Mantis': 2400,
+    'Peacock Butterfly': 2500,
+    'Atlas Moth': 3000,
+    'Queen Alexandras Birdwing': 4000,
+    'Banded Dragonfly': 4500,
+    'Scorpion': 8000,
+    'Tarantula': 8000,
+    'Iron Nugget': 500,
+    'Wood': 60,
+    'Softwood': 60,
+    'Hardwood': 60,
+    'Branch': 5,
+    'Honeycomb': 200,
+    'Virtual Boy': 9000,
+    'GameBoy Advance': 1500,
+    'GameCube':2500,
+    'GameBoy': 1000,
+    'DS': 2000,
+    '3DS': 2500,
+    'New 3DS': 3000,
+    'Wii': 3000,
+    'Wii U': 3300,
+    'Nintendo Switch': 3500,
+    'Nintendo Switch 2': 5000,
+    'Rare Flower': 250,
+    'Flower': 50
+    // Add more sell prices for other items as needed
+};
+// --- END ADDED SELL PRICES ---
+
 const possibleVillagers = ['Bob', 'Alice', 'Charlie', 'Daisy', 'Patches', 'Poppy', 'Rosie', 'Tom', 'Goldie', 'Sheldon', 'Fauna', 'Apollo', 'Marshal', 'Stitches', 'Ankha'];
-const possibleGiftItems = ['Flower', 'Shell', 'Apples', 'Pears', 'Cherries', 'Oranges', 'Grapes', 'Mushroom'];
+const possibleGiftItems = ['Flower', 'Shell', 'Apple', 'Pear', 'Cherry', 'Orange', 'Grape', 'Mushroom'];
 const possibleThankYouGifts = ['Bells Pouch', 'Rare Flower', 'Sea Shell', 'Polished Pebble', 'Design Sketch', 'Virtual Boy', 'GameBoy Advance', 'GameCube', 'GameBoy', 'DS', '3DS', 'New 3DS', 'Wii', 'Wii U', 'Nintendo Switch', 'Nintendo Switch 2'];
 const possibleHybridFlowers = ['Pink Roses', 'Orange Roses', 'Black Roses', 'Purple Roses', 'Blue Roses', 'Pink Cosmos', 'Orange Cosmos', 'Black Cosmos', 'Pink Tulips', 'Orange Tulips', 'Purple Tulips', 'Black Tulips', 'Pink Lilies', 'Orange Lilies', 'Black Lilies', 'Pink Hyacinths', 'Orange Hyacinths', 'Purple Hyacinths', 'Blue Hyacinths', 'Pink Windflowers', 'Orange Windflowers', 'Purple Windflowers', 'Blue Windflowers', 'Green Mums', 'Purple Pansies', 'Blue Pansies'];
 
@@ -116,9 +189,10 @@ function fish() {
     }
 
     const rarityChance = Math.random();
-    let caughtFish = 'Dace';
+    let caughtFish = 'Sea Bass';
     if (gameState.fishingRod && gameState.fishingRod.type === 'Basic Rod') {
-        if (rarityChance > 0.7) caughtFish = 'Pond Smelt';
+        if (rarityChance > 0.6) caughtFish = 'Pond Smelt';
+        if (rarityChance > 0.7) caughtFish = 'Dace';
         if (rarityChance > 0.9) caughtFish = 'Crucian Carp';
     }
     if (gameState.fishingRod && gameState.fishingRod.type === 'Sturdy Rod') {
@@ -163,7 +237,8 @@ function catchBugs() {
     const rarityChance = Math.random();
     let caughtBug = 'Common Butterfly';
     if (gameState.bugNet && gameState.bugNet.type === 'Basic Net') {
-        if (rarityChance > 0.7) caughtBug = 'Honeybee';
+        if (rarityChance > 0.6) caughtBug = 'Honeybee';
+        if (rarityChance > 0.7) caughtBug = 'Wasp';
         if (rarityChance > 0.9) caughtBug = 'Yellow Butterfly';
     }
     if (gameState.bugNet && gameState.bugNet.type === 'Sturdy Net') {
@@ -178,10 +253,10 @@ function catchBugs() {
         if (rarityChance > 0.97) caughtBug = 'Atlas Moth';
     }
     if (gameState.bugNet && gameState.bugNet.type === 'Ultimate Net') {
-        if (rarityChance > 0.2) caughtFish = 'Queen Alexandras Birdwing';
-        if (rarityChance > 0.4) caughtFish = 'Banded Dragonfly';
-        if (rarityChance > 0.90) caughtFish = 'Scorpion';
-        if (rarityChance > 0.99) caughtFish = 'Tarantula';
+        if (rarityChance > 0.2) caughtBug = 'Queen Alexandras Birdwing';
+        if (rarityChance > 0.4) caughtBug = 'Banded Dragonfly';
+        if (rarityChance > 0.90) caughtBug = 'Scorpion';
+        if (rarityChance > 0.99) caughtBug = 'Tarantula';
     }
 
     outputMessage(`You caught a ${caughtBug}!`, 'positive');
@@ -339,7 +414,14 @@ function sellItem() {
         return;
     }
 
-    const sellPrice = 25;
+    // --- LOOK UP SELL PRICE ---
+    const sellPrice = sellPrices[itemToSell];
+    if (sellPrice === undefined) {
+        outputMessage(`There's no set price for selling ${itemToSell}.`, 'negative');
+        return; // Or you could set a default price here
+    }
+    // --- END LOOK UP SELL PRICE ---
+
     const totalPrice = sellPrice * quantityToSell;
 
     gameState.inventory[itemToSell] -= quantityToSell;
