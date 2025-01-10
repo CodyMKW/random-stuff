@@ -15,18 +15,20 @@ let gameState = {
 const rodTypes = {
     'Basic Rod': { durability: 10, price: 100 },
     'Sturdy Rod': { durability: 25, price: 250 },
-    'Pro Rod': { durability: 50, price: 500 }
+    'Pro Rod': { durability: 50, price: 500 },
+    'Ultimate Rod': { durability: 50000, price: 99999999 }
 };
 
 const netTypes = {
     'Basic Net': { durability: 10, price: 80 },
     'Sturdy Net': { durability: 25, price: 200 },
-    'Pro Net': { durability: 40, price: 400 }
+    'Pro Net': { durability: 40, price: 400 },
+    'Ultimate Net': { durability: 50000, price: 99999999 }
 };
 
 const shopInventory = {
-    'Basic Rod': 100, 'Sturdy Rod': 250, 'Pro Rod': 500,
-    'Basic Net': 80, 'Sturdy Net': 200, 'Pro Net': 400,
+    'Basic Rod': 100, 'Sturdy Rod': 250, 'Pro Rod': 500, 'Ultimate Rod': 99999999,
+    'Basic Net': 80, 'Sturdy Net': 200, 'Pro Net': 400, 'Ultimate Net': 99999999,
     'Medicine': 150,
     'Shovel': 200,
     'Axe': 250,
@@ -120,6 +122,12 @@ function fish() {
         if (rarityChance > 0.85) caughtFish = 'Red Snapper';
         if (rarityChance > 0.97) caughtFish = 'Stringfish';
     }
+    if (gameState.fishingRod && gameState.fishingRod.type === 'Ultimate Rod') {
+        if (rarityChance > 0.2) caughtFish = 'Napoleonfish';
+        if (rarityChance > 0.4) caughtFish = 'Shark';
+        if (rarityChance > 0.75) caughtFish = 'Dorado';
+        if (rarityChance > 0.80) caughtFish = 'Coelacanth';
+    }
 
     outputMessage(`You caught a ${caughtFish}!`, 'positive');
     gameState.inventory[caughtFish] = (gameState.inventory[caughtFish] || 0) + 1;
@@ -158,6 +166,12 @@ function catchBugs() {
         if (rarityChance > 0.6) caughtBug = 'Orchid Mantis';
         if (rarityChance > 0.85) caughtBug = 'Peacock Butterfly';
         if (rarityChance > 0.97) caughtBug = 'Atlas Moth';
+    }
+    if (gameState.bugNet && gameState.bugNet.type === 'Ultimate Net') {
+        if (rarityChance > 0.2) caughtFish = 'Queen Alexandras Birdwing';
+        if (rarityChance > 0.4) caughtFish = 'Banded Dragonfly';
+        if (rarityChance > 0.90) caughtFish = 'Scorpion';
+        if (rarityChance > 0.99) caughtFish = 'Tarantula';
     }
 
     outputMessage(`You caught a ${caughtBug}!`, 'positive');
