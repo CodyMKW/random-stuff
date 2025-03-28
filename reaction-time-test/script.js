@@ -16,7 +16,7 @@ startButton.addEventListener('click', () => {
   } else {
     result.textContent = '';
     startButton.textContent = 'Wait for Green';
-    startButton.style.backgroundColor = '#333333';
+    startButton.classList.remove('ready');
     const randomDelay = Math.floor(Math.random() * 5000) + 1000;
     setTimeout(() => {
       startTime = new Date();
