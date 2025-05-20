@@ -1,7 +1,7 @@
 const container = document.getElementById("userstyles-container");
 
 // Fetch userstyles from the JSON file
-fetch('https://api.npoint.io/a7fc8fd835b5690622fd')
+fetch('https://api.npoint.io/54bfe0417ed06740c244')
   .then(response => {
     if (!response.ok) {
       throw new Error("Failed to load userstyles.json");
