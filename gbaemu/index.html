@@ -53,7 +53,10 @@
             overflow: hidden;
             position: relative;
         }
-        #load-rom {
+        #buttons {
+            margin-bottom: 10px;
+        }
+        #buttons button {
             background: #ff6b35;
             color: #000;
             border: none;
@@ -61,9 +64,9 @@
             border-radius: 4px;
             cursor: pointer;
             font-weight: bold;
-            margin-bottom: 10px;
+            margin: 5px;
         }
-        #load-rom:hover {
+        #buttons button:hover {
             background: #e55a2b;
         }
         #game {
@@ -107,7 +110,12 @@
         <p class="note">Full-screen? F11. Volume? Your speakers aren't trash, are they?</p>
     </div>
     
-    <button id="load-rom">Load GBA ROM</button>
+    <div id="buttons">
+        <button id="load-rom">Load GBA ROM</button>
+        <button id="download-save">Download Save</button>
+        <button id="upload-save">Upload Save</button>
+    </div>
+    
     <div id="emulator-container">
         <div id="game"></div>
     </div>
@@ -118,8 +126,9 @@
         EJS_core = 'mgba'; 
         EJS_biosUrl = 'gba-bios.bin'; 
         EJS_pathtodata = 'data/';
+        let currentGameId = null;
 
-        // File loader
+        // Load ROM
         document.getElementById('load-rom').addEventListener('click', function () {
             const input = document.createElement('input');
             input.type = 'file';
@@ -129,6 +138,10 @@
                 if (file) {
                     const url = URL.createObjectURL(file);
                     EJS_gameUrl = url;
+
+                    // Use filename as gameId so saves don’t clash
+                    currentGameId = file.name.replace(/\.[^/.]+$/, ""); 
+                    EJS_gameID = currentGameId;
 
                     // Clear previous emulator instance
                     document.querySelector('#game').innerHTML = '';
@@ -144,6 +157,65 @@
                         };
                         document.head.appendChild(script);
                     }
+                }
+            };
+            input.click();
+        });
+
+        // Download Save
+        document.getElementById('download-save').addEventListener('click', function () {
+            if (!currentGameId) {
+                alert("No game loaded!");
+                return;
+            }
+            const key = "EJS_" + currentGameId + "_save";
+            const saveData = localStorage.getItem(key);
+            if (saveData) {
+                const binary = atob(saveData);
+                const array = new Uint8Array(binary.length);
+                for (let i = 0; i < binary.length; i++) {
+                    array[i] = binary.charCodeAt(i);
+                }
+                const blob = new Blob([array], { type: 'application/octet-stream' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = currentGameId + ".sav";
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+            } else {
+                alert("No save found for this game!");
+            }
+        });
+
+        // Upload Save
+        document.getElementById('upload-save').addEventListener('click', function () {
+            if (!currentGameId) {
+                alert("Load a game before uploading a save!");
+                return;
+            }
+            const input = document.createElement('input');
+            input.type = 'file';
+            input.accept = '.sav';
+            input.onchange = function (e) {
+                const file = e.target.files[0];
+                if (file) {
+                    const reader = new FileReader();
+                    reader.onload = function (event) {
+                        const arrayBuffer = event.target.result;
+                        const bytes = new Uint8Array(arrayBuffer);
+                        let binary = "";
+                        for (let i = 0; i < bytes.byteLength; i++) {
+                            binary += String.fromCharCode(bytes[i]);
+                        }
+                        const base64 = btoa(binary);
+
+                        const key = "EJS_" + currentGameId + "_save";
+                        localStorage.setItem(key, base64);
+                        alert("Save uploaded! Reload the game to apply it.");
+                    };
+                    reader.readAsArrayBuffer(file);
                 }
             };
             input.click();
