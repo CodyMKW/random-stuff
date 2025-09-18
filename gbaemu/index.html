@@ -124,24 +124,6 @@
     EJS_pathtodata = 'data/';
     let currentGameId = null;
 
-    // Hook save event
-    window.EJS_onSaveState = function(data) {
-      if (currentGameId) {
-        localStorage.setItem("EJS_" + currentGameId + "_save", data);
-        console.log("Save stored for", currentGameId);
-      }
-    };
-
-    // Load save if it exists
-    function loadExistingSave() {
-      if (!currentGameId) return;
-      const saveData = localStorage.getItem("EJS_" + currentGameId + "_save");
-      if (saveData && window.EJS_loadState) {
-        console.log("Loading save for", currentGameId);
-        EJS_loadState(saveData);
-      }
-    }
-
     // Load ROM
     document.getElementById('load-rom').addEventListener('click', function () {
       const input = document.createElement('input');
@@ -153,18 +135,16 @@
           const url = URL.createObjectURL(file);
           currentGameId = file.name.replace(/\.[^/.]+$/, "");
           EJS_gameUrl = url;
-          EJS_gameID = currentGameId;
+          EJS_gameID = currentGameId; // IMPORTANT: set before EJS_start()
 
           document.querySelector('#game').innerHTML = '';
           if (typeof EJS_start !== 'undefined') {
             EJS_start();
-            setTimeout(loadExistingSave, 2000);
           } else {
             const script = document.createElement('script');
             script.src = 'data/loader.js';
             script.onload = function () {
               EJS_start();
-              setTimeout(loadExistingSave, 2000);
             };
             document.head.appendChild(script);
           }
