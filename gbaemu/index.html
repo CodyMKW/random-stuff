@@ -124,6 +124,23 @@
     EJS_pathtodata = 'data/';
     let currentGameId = null;
 
+    // SRAM hook functions
+    function b64Encode(bytes) {
+      let binary = "";
+      for (let i = 0; i < bytes.length; i++) {
+        binary += String.fromCharCode(bytes[i]);
+      }
+      return btoa(binary);
+    }
+    function b64Decode(b64) {
+      const binary = atob(b64);
+      const bytes = new Uint8Array(binary.length);
+      for (let i = 0; i < binary.length; i++) {
+        bytes[i] = binary.charCodeAt(i);
+      }
+      return bytes;
+    }
+
     // Load ROM
     document.getElementById('load-rom').addEventListener('click', function () {
       const input = document.createElement('input');
@@ -135,7 +152,16 @@
           const url = URL.createObjectURL(file);
           currentGameId = file.name.replace(/\.[^/.]+$/, "");
           EJS_gameUrl = url;
-          EJS_gameID = currentGameId; // IMPORTANT: set before EJS_start()
+          EJS_gameID = currentGameId;
+
+          // Attach SRAM save hook
+          EJS_onSaveSRAM = function (saveBytes) {
+            localStorage.setItem("EJS_" + currentGameId + "_sram", b64Encode(saveBytes));
+          };
+          EJS_onLoadSRAM = function () {
+            const data = localStorage.getItem("EJS_" + currentGameId + "_sram");
+            return data ? b64Decode(data) : null;
+          };
 
           document.querySelector('#game').innerHTML = '';
           if (typeof EJS_start !== 'undefined') {
@@ -159,13 +185,11 @@
         alert("No game loaded!");
         return;
       }
-      const key = "EJS_" + currentGameId + "_save";
+      const key = "EJS_" + currentGameId + "_sram";
       const saveData = localStorage.getItem(key);
       if (saveData) {
-        const binary = atob(saveData);
-        const array = new Uint8Array(binary.length);
-        for (let i = 0; i < binary.length; i++) array[i] = binary.charCodeAt(i);
-        const blob = new Blob([array], { type: 'application/octet-stream' });
+        const bytes = b64Decode(saveData);
+        const blob = new Blob([bytes], { type: 'application/octet-stream' });
         const url = URL.createObjectURL(blob);
         const a = document.createElement('a');
         a.href = url;
@@ -193,12 +217,7 @@
           const reader = new FileReader();
           reader.onload = function (event) {
             const bytes = new Uint8Array(event.target.result);
-            let binary = "";
-            for (let i = 0; i < bytes.byteLength; i++) {
-              binary += String.fromCharCode(bytes[i]);
-            }
-            const base64 = btoa(binary);
-            localStorage.setItem("EJS_" + currentGameId + "_save", base64);
+            localStorage.setItem("EJS_" + currentGameId + "_sram", b64Encode(bytes));
             alert("Save uploaded! Reload the ROM to apply it.");
           };
           reader.readAsArrayBuffer(file);
