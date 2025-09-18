@@ -124,7 +124,7 @@
     EJS_pathtodata = 'data/';
     let currentGameId = null;
 
-    // SRAM hook functions
+    // Helpers
     function b64Encode(bytes) {
       let binary = "";
       for (let i = 0; i < bytes.length; i++) {
@@ -141,6 +141,17 @@
       return bytes;
     }
 
+    // Global SRAM hooks
+    EJS_onSaveSRAM = function (saveBytes) {
+      if (!currentGameId) return;
+      localStorage.setItem("EJS_" + currentGameId + "_sram", b64Encode(saveBytes));
+    };
+    EJS_onLoadSRAM = function () {
+      if (!currentGameId) return null;
+      const data = localStorage.getItem("EJS_" + currentGameId + "_sram");
+      return data ? b64Decode(data) : null;
+    };
+
     // Load ROM
     document.getElementById('load-rom').addEventListener('click', function () {
       const input = document.createElement('input');
@@ -153,15 +164,6 @@
           currentGameId = file.name.replace(/\.[^/.]+$/, "");
           EJS_gameUrl = url;
           EJS_gameID = currentGameId;
-
-          // Attach SRAM save hook
-          EJS_onSaveSRAM = function (saveBytes) {
-            localStorage.setItem("EJS_" + currentGameId + "_sram", b64Encode(saveBytes));
-          };
-          EJS_onLoadSRAM = function () {
-            const data = localStorage.getItem("EJS_" + currentGameId + "_sram");
-            return data ? b64Decode(data) : null;
-          };
 
           document.querySelector('#game').innerHTML = '';
           if (typeof EJS_start !== 'undefined') {
