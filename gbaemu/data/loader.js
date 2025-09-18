@@ -13,7 +13,7 @@
     const folderPath = (path) => path.substring(0, path.length - path.split("/").pop().length);
     let scriptPath = (typeof window.EJS_pathtodata === "string") ? window.EJS_pathtodata : folderPath((new URL(document.currentScript.src)).pathname);
     if (!scriptPath.endsWith("/")) scriptPath += "/";
-
+    //console.log(scriptPath);
     function loadScript(file) {
         return new Promise(function(resolve) {
             let script = document.createElement("script");
@@ -78,7 +78,6 @@
         await loadScript("emulator.min.js");
         await loadStyle("emulator.min.css");
     }
-
     const config = {};
     config.gameUrl = window.EJS_gameUrl;
     config.dataPath = scriptPath;
@@ -105,6 +104,7 @@
     config.gamePatchUrl = window.EJS_gamePatchUrl;
     config.gameParentUrl = window.EJS_gameParentUrl;
     config.netplayUrl = window.EJS_netplayServer;
+    config.netplayICEServers = window.EJS_netplayICEServers; 
     config.gameId = window.EJS_gameID;
     config.backgroundImg = window.EJS_backgroundImage;
     config.backgroundBlur = window.EJS_backgroundBlur;
@@ -116,6 +116,7 @@
     config.softLoad = window.EJS_softLoad;
     config.capture = window.EJS_screenCapture;
     config.externalFiles = window.EJS_externalFiles;
+    config.dontExtractRom = window.EJS_dontExtractRom;
     config.dontExtractBIOS = window.EJS_dontExtractBIOS;
     config.disableDatabases = window.EJS_disableDatabases;
     config.disableLocalStorage = window.EJS_disableLocalStorage;
@@ -123,26 +124,60 @@
     config.noAutoFocus = window.EJS_noAutoFocus;
     config.videoRotation = window.EJS_videoRotation;
     config.hideSettings = window.EJS_hideSettings;
+    config.browserMode = window.EJS_browserMode;
     config.shaders = Object.assign({}, window.EJS_SHADERS, window.EJS_shaders ? window.EJS_shaders : {});
+    config.fixedSaveInterval = window.EJS_fixedSaveInterval;
 
     let systemLang;
     try {
         systemLang = Intl.DateTimeFormat().resolvedOptions().locale;
-    } catch(e) {}
-    if ((typeof window.EJS_language === "string" && window.EJS_language !== "en-US") || (systemLang && window.EJS_disableAutoLang !== false)) {
+    } catch(e) {} //Ignore
+    const defaultLangs = ["en", "en-US"];
+    const isDefaultLang = (lang) => defaultLangs.includes(lang);
+    if ((typeof window.EJS_language === "string" && !isDefaultLang(window.EJS_language)) || (systemLang && window.EJS_disableAutoLang !== false)) {
         const language = window.EJS_language || systemLang;
+        const autoLang = !window.EJS_language && typeof systemLang === "string";
         try {
-            let path;
+            let languagePath;
+            let fallbackPath = false;
             console.log("Loading language", language);
             if ("undefined" != typeof EJS_paths && typeof EJS_paths[language] === "string") {
-                path = EJS_paths[language];
+                languagePath = EJS_paths[language];
             } else {
-                path = scriptPath + "localization/" + language + ".json";
+                languagePath = scriptPath + "localization/" + language + ".json";
+                if (language.includes("-") || language.includes("_")) {
+                    fallbackPath = scriptPath + "localization/" + language.split(/[-_]/)[0] + ".json";
+                }
             }
             config.language = language;
-            config.langJson = JSON.parse(await (await fetch(path)).text());
+            let langJson = {};
+            let missingLang = false;
+            if (!isDefaultLang(language)) {
+                if (autoLang) {
+                    try {
+                        let languageJson = await fetch(languagePath);
+                        if (!languageJson.ok) throw new Error(`Missing language file: ${languageJson.status}`);
+                        langJson = JSON.parse(await languageJson.text());
+                        if (fallbackPath) {
+                            let fallbackJson = await fetch(fallbackPath);
+                            missingLang = !fallbackJson.ok;
+                            if (!fallbackJson.ok) throw new Error(`Missing language file: ${fallbackJson.status}`);
+                            langJson = { ...JSON.parse(await fallbackJson.text()), ...langJson };
+                        }
+                    } catch(e) {
+                        config.language = language.split(/[-_]/)[0];
+                        console.warn("Failed to load language:", language + ",", "trying default language:", config.language);
+                        if (!missingLang) {
+                            langJson = JSON.parse(await (await fetch(fallbackPath)).text());
+                        }
+                    }
+                } else {
+                    langJson = JSON.parse(await (await fetch(languagePath)).text());
+                }
+                config.langJson = langJson;
+            }
         } catch(e) {
-            console.log("Missing language", language, "!!");
+            console.log("Missing language:", language, "!!");
             delete config.language;
             delete config.langJson;
         }
@@ -150,7 +185,6 @@
 
     window.EJS_emulator = new EmulatorJS(EJS_player, config);
     window.EJS_adBlocked = (url, del) => window.EJS_emulator.adBlocked(url, del);
-
     if (typeof window.EJS_ready === "function") {
         window.EJS_emulator.on("ready", window.EJS_ready);
     }
@@ -163,30 +197,14 @@
     if (typeof window.EJS_onSaveState === "function") {
         window.EJS_emulator.on("saveState", window.EJS_onSaveState);
     }
-
-    // === SAVE/LOAD PATCH ===
     if (typeof window.EJS_onLoadSave === "function") {
         window.EJS_emulator.on("loadSave", window.EJS_onLoadSave);
-    } else {
-        window.EJS_emulator.on("loadSave", function() {
-            if (!config.gameId) return null;
-            const data = localStorage.getItem("EJS_" + config.gameId + "_save");
-            if (data) {
-                const binary = atob(data);
-                return new Uint8Array([...binary].map(c => c.charCodeAt(0)));
-            }
-            return null;
-        });
     }
-
     if (typeof window.EJS_onSaveSave === "function") {
         window.EJS_emulator.on("saveSave", window.EJS_onSaveSave);
-    } else {
-        window.EJS_emulator.on("saveSave", function(saveData) {
-            if (!config.gameId) return;
-            const b64 = btoa(String.fromCharCode(...saveData));
-            localStorage.setItem("EJS_" + config.gameId + "_save", b64);
-            console.log("Saved:", config.gameId);
-        });
+    }
+    if (typeof window.EJS_onSaveUpdate === "function") {
+        window.EJS_emulator.on("saveUpdate", window.EJS_onSaveUpdate);
+        window.EJS_emulator.enableSaveUpdateEvent();
     }
 })();
