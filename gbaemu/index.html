@@ -1,252 +1,168 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>CodyBoy Advance — EmulatorJS GBA (Maple build)</title>
-<link rel="icon" href="data:,🎮" />
-<style>
-  :root{
-    --bg:#0b0f14; --panel:#0f1720; --accent:#ff6b6b; --muted:#9aa5b1;
-    --glass: rgba(255,255,255,0.04);
-  }
-  html,body{height:100%;margin:0;font-family:Inter,system-ui,Segoe UI,Roboto,"Helvetica Neue",Arial;}
-  body{
-    background:
-      radial-gradient(1200px 400px at 10% 10%, rgba(255,107,107,0.06), transparent 8%),
-      linear-gradient(180deg,#071018 0%, #071623 45%, #051018 100%);
-    color:#e6eef6;
-    -webkit-font-smoothing:antialiased;
-    padding:24px;
-    box-sizing:border-box;
-  }
-  header{display:flex;gap:16px;align-items:center;margin-bottom:18px}
-  .brand{display:flex;gap:12px;align-items:center}
-  .logo{width:52px;height:52px;background:linear-gradient(135deg,#ff9a9e,#fecfef);border-radius:14px;display:flex;align-items:center;justify-content:center;font-weight:700;color:#111}
-  h1{font-size:20px;margin:0}
-  p.lead{margin:0;color:var(--muted);font-size:13px}
-  .layout{display:grid;grid-template-columns: 420px 1fr; gap:20px; align-items:start;}
-  .card{background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01)); border-radius:12px;padding:14px;box-shadow: 0 6px 18px rgba(2,6,23,0.6); border:1px solid rgba(255,255,255,0.03)}
-  .controls .section{margin-bottom:12px}
-  .dropzone{border:2px dashed rgba(255,255,255,0.04);padding:18px;border-radius:10px;text-align:center;cursor:pointer;background:var(--glass);}
-  .muted{color:var(--muted);font-size:13px}
-  .btn{display:inline-flex;align-items:center;gap:8px;padding:10px 12px;border-radius:8px;background:linear-gradient(90deg,var(--accent),#ffa77a);color:#07201a;font-weight:600;border:none;cursor:pointer;}
-  .btn.ghost{background:transparent;border:1px solid rgba(255,255,255,0.04);color:var(--muted);font-weight:600}
-  .flex{display:flex;gap:8px;align-items:center}
-  .kbd{font-family:monospace;background:rgba(255,255,255,0.03);border-radius:6px;padding:6px 8px;font-size:12px;color:var(--muted)}
-  .small{font-size:13px}
-  #gameWrap{width:100%;height:520px;background:#000;border-radius:10px;overflow:hidden;display:flex;align-items:center;justify-content:center;position:relative}
-  #game{width:100%;height:100%;}
-  .meta{display:flex;justify-content:space-between;margin-top:10px;gap:8px;align-items:center}
-  .info{color:var(--muted);font-size:13px}
-  .slots{display:grid;grid-template-columns:repeat(5,1fr);gap:8px}
-  .slot{background:rgba(255,255,255,0.02);padding:8px;border-radius:8px;text-align:center;font-size:13px}
-  .slot .title{font-weight:700;color:#fff}
-  .save-list{max-height:160px;overflow:auto;padding:6px;border-radius:8px;border:1px dashed rgba(255,255,255,0.02)}
-  label.fileish{display:inline-block;padding:10px;border-radius:8px;background:rgba(255,255,255,0.02);cursor:pointer}
-  footer{margin-top:18px;color:var(--muted);font-size:13px}
-  .unhinge{ position:absolute; right:14px; top:12px; font-size:12px; color: #071018; background: #ffdede; padding:6px 8px; border-radius:20px; transform: rotate(-6deg); box-shadow: 0 6px 12px rgba(0,0,0,0.3)}
-  .mapping{display:grid;grid-template-columns:repeat(2,1fr);gap:6px;margin-top:8px}
-  .mapping .row{display:flex;justify-content:space-between;padding:6px;background:rgba(255,255,255,0.01);border-radius:6px;font-size:13px}
-  .touchpad{display:none}
-  @media (max-width:1100px){
-    .layout{grid-template-columns:1fr; }
-    #gameWrap{height:420px}
-    .touchpad{display:block;margin-top:8px}
-  }
-</style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>CodAdvance - GBA Emulator</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(135deg, #1a1a1a, #2b2b2b);
+      color: #f0f0f0;
+      margin: 0;
+      padding: 0;
+      text-align: center;
+    }
+    header {
+      padding: 20px;
+      background: #111;
+      font-size: 2rem;
+      font-weight: bold;
+      color: #ff5555;
+      letter-spacing: 2px;
+      text-shadow: 0 0 10px #ff5555;
+    }
+    #game {
+      margin: 20px auto;
+      width: 640px;
+      height: 480px;
+      background: #000;
+      border: 3px solid #ff5555;
+      border-radius: 12px;
+      box-shadow: 0 0 30px rgba(255,85,85,0.5);
+    }
+    .controls, .savestates {
+      margin-top: 25px;
+      padding: 20px;
+      background: #1f1f1f;
+      border-radius: 10px;
+      display: inline-block;
+      box-shadow: 0 0 20px rgba(0,0,0,0.5);
+    }
+    .controls h2, .savestates h2 {
+      margin-bottom: 15px;
+      color: #ff7777;
+    }
+    .controls table {
+      margin: auto;
+      border-collapse: collapse;
+    }
+    .controls td {
+      padding: 8px 16px;
+      border: 1px solid #444;
+      background: #2c2c2c;
+      border-radius: 6px;
+    }
+    .savestates button {
+      margin: 6px;
+      padding: 10px 18px;
+      font-size: 1rem;
+      border: none;
+      border-radius: 8px;
+      background: #ff5555;
+      color: #fff;
+      cursor: pointer;
+      box-shadow: 0 0 10px rgba(255,85,85,0.5);
+      transition: background 0.2s;
+    }
+    .savestates button:hover {
+      background: #ff7777;
+    }
+  </style>
 </head>
 <body>
-<header>
-  <div class="brand">
-    <div class="logo">CBA</div>
+  <header>🎮 CodAdvance 🎮</header>
+  
+  <div id="game"></div>
+
+  <div class="controls">
+    <h2>Controls</h2>
+    <table>
+      <tr><td>A</td><td>Z</td></tr>
+      <tr><td>B</td><td>X</td></tr>
+      <tr><td>L</td><td>A</td></tr>
+      <tr><td>R</td><td>S</td></tr>
+      <tr><td>Start</td><td>Enter</td></tr>
+      <tr><td>Select</td><td>Shift</td></tr>
+      <tr><td>D-Pad</td><td>Arrow Keys</td></tr>
+    </table>
+  </div>
+
+  <div class="savestates">
+    <h2>Save States</h2>
     <div>
-      <h1>CodyBoy Advance — EmulatorJS (Maple build)</h1>
-      <p class="lead">Pokémon-friendly saves • Drag & Drop ROMs • Save-States • Pro controls</p>
+      <button onclick="saveState(1)">Save Slot 1</button>
+      <button onclick="loadState(1)">Load Slot 1</button>
     </div>
-  </div>
-  <div style="margin-left:auto;text-align:right">
-    <div class="muted">Powered by <strong>EmulatorJS</strong></div>
-    <div style="font-size:12px;color:var(--muted)">CDN: stable • Core: mGBA</div>
-  </div>
-</header>
-
-<div class="layout">
-  <!-- LEFT: Controls -->
-  <div class="card controls">
-    <div class="section">
-      <div class="dropzone" id="dropzone" tabindex="0">
-        <div style="font-size:14px;font-weight:700">Drop a .gba ROM here</div>
-        <div class="muted" style="margin-top:8px">Or click to choose — supports drag & drop, and will keep your saves local.</div>
-        <input id="romPicker" accept=".gba,.zip" type="file" style="display:none">
-      </div>
+    <div>
+      <button onclick="saveState(2)">Save Slot 2</button>
+      <button onclick="loadState(2)">Load Slot 2</button>
     </div>
-
-    <div class="section">
-      <div style="display:flex;gap:8px;align-items:center;justify-content:space-between">
-        <div>
-          <div style="font-weight:700">Game Status</div>
-          <div class="muted small" id="status">No game loaded</div>
-        </div>
-        <div>
-          <button class="btn ghost" id="restartBtn">Restart</button>
-          <button class="btn ghost" id="pauseBtn">Pause</button>
-        </div>
-      </div>
+    <div>
+      <button onclick="saveState(3)">Save Slot 3</button>
+      <button onclick="loadState(3)">Load Slot 3</button>
     </div>
-
-    <div class="section">
-      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
-        <div style="font-weight:700">Battery Save</div>
-        <div class="muted small">Pokémon-friendly</div>
-      </div>
-      <div style="display:flex;gap:8px;margin-bottom:8px">
-        <button class="btn" id="exportSaveBtn">Export Latest Save</button>
-        <label class="fileish">
-          Import Save <input id="importSave" type="file" accept=".sav" style="display:none" />
-        </label>
-      </div>
-      <div class="muted small">If the emulator writes a battery save, this panel will show it and allow export.</div>
-      <div style="margin-top:8px" id="savePreview"></div>
-    </div>
-
-    <div class="section">
-      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
-        <div style="font-weight:700">Save States (download / restore)</div>
-        <div class="muted small">Quick download slots</div>
-      </div>
-
-      <div class="slots" id="slots">
-        <!-- slots injected -->
-      </div>
-      <div style="margin-top:8px" class="muted small">Use the built-in emulator controls to create a save state (or use emulator UI). When a save-state is created, you'll be invited to download it here.</div>
-    </div>
-
-    <div class="section">
-      <div style="font-weight:700;margin-bottom:6px">Controls & Mapping</div>
-      <div class="mapping" id="mapping">
-        <div class="row"><div>A</div><div class="kbd">Z / X / Gamepad A</div></div>
-        <div class="row"><div>B</div><div class="kbd">X / C / Gamepad B</div></div>
-        <div class="row"><div>Select</div><div class="kbd">V / Gamepad Select</div></div>
-        <div class="row"><div>Start</div><div class="kbd">Enter / Gamepad Start</div></div>
-        <div class="row"><div>Up/Down/Left/Right</div><div class="kbd">Arrow keys / D-pad</div></div>
-        <div class="row"><div>Quick Save</div><div class="kbd">F5</div></div>
-        <div class="row"><div>Quick Load</div><div class="kbd">F8</div></div>
-        <div class="row"><div>Screen Shot</div><div class="kbd">Ctrl+S</div></div>
-      </div>
-    </div>
-
-    <div class="section">
-      <div style="font-weight:700;margin-bottom:6px">Touch Controls</div>
-      <div class="touchpad">
-        <div class="muted small">For phones, an on-screen gamepad will appear automatically. You can also toggle it with the emulator UI.</div>
-      </div>
-    </div>
-
-    <div class="section">
-      <div style="font-weight:700">Advanced</div>
-      <div style="display:flex;gap:8px;margin-top:8px">
-        <button id="dumpSaves" class="btn ghost">List cached saves</button>
-        <button id="clearCache" class="btn ghost">Clear cached files</button>
-      </div>
+    <div>
+      <button onclick="exportSave()">Export Save</button>
+      <button onclick="importSave()">Import Save</button>
     </div>
   </div>
 
-  <!-- RIGHT: Game viewport -->
-  <div>
-    <div class="card">
-      <div style="position:relative;">
-        <div id="gameWrap">
-          <div class="unhinge">🍁 Maple Edition</div>
-          <div id="game"></div>
-          <!-- EmulatorJS will mount into #game -->
-        </div>
-      </div>
+  <script>
+    // EmulatorJS setup
+    EJS_emulator = '#game';
+    EJS_core = 'gba';
+    EJS_gameUrl = 'roms/pokemon-ruby.gba'; // update path to your ROM
+    EJS_biosUrl = 'bios/gba_bios.bin';     // update path to your BIOS
+    EJS_pathtodata = 'data/';
+    EJS_options = {
+      saveType: 3 // Force FLASH 128K for Pokémon
+    };
+  </script>
+  <script src="data/loader.js"></script>
 
-      <div class="meta">
-        <div class="info">
-          <div><strong id="gameTitle">—</strong></div>
-          <div class="muted" id="gameMeta">Core: gba • CDN: stable</div>
-        </div>
-        <div style="display:flex;gap:10px;align-items:center">
-          <div style="font-size:13px;color:var(--muted)">FPS: <span id="fps">—</span></div>
-          <div style="font-size:13px;color:var(--muted)">Status: <span id="runState">idle</span></div>
-        </div>
-      </div>
+  <script>
+    // Save State Functions
+    async function saveState(slot) {
+      const state = await EJS_emulatorInstance.saveState();
+      localStorage.setItem(`codadvance_slot${slot}`, state);
+      alert(`Saved to Slot ${slot}`);
+    }
+    async function loadState(slot) {
+      const state = localStorage.getItem(`codadvance_slot${slot}`);
+      if (state) {
+        await EJS_emulatorInstance.loadState(state);
+        alert(`Loaded from Slot ${slot}`);
+      } else {
+        alert(`No save found in Slot ${slot}`);
+      }
+    }
 
-      <div style="margin-top:12px" class="card">
-        <div style="font-weight:700;margin-bottom:8px">Save / State Activity</div>
-        <div class="save-list" id="activityLog">No save activity yet.</div>
-      </div>
-
-    </div>
-
-    <footer>
-      Mapled by Maple • EmulatorJS CDN + mGBA core. Read the docs for advanced embed options and servers. (This page streams emulator binaries from the official CDN.) 
-    </footer>
-  </div>
-</div>
-
-<script>
-const CDN_BASE = 'https://cdn.emulatorjs.org/stable/data/';
-const LOADER_URL = CDN_BASE + 'loader.js';
-let latestBatterySave = null;
-let saveStateSlots = new Array(10).fill(null);
-
-/* --- important save fix --- */
-function persistSaveToLocal(hash, buf, name){
-  try {
-    localStorage.setItem("CBA_sav_" + hash, JSON.stringify({
-      ts: Date.now(),
-      name,
-      b64: btoa(String.fromCharCode(...new Uint8Array(buf)))
-    }));
-  } catch(e){ console.warn("localStorage save failed", e); }
-}
-function loadSaveFromLocal(hash){
-  const raw = localStorage.getItem("CBA_sav_" + hash);
-  if(!raw) return null;
-  try {
-    const obj = JSON.parse(raw);
-    const bin = Uint8Array.from(atob(obj.b64), c => c.charCodeAt(0));
-    return {data: bin, name: obj.name};
-  } catch(e){ return null; }
-}
-
-/* hook for EmulatorJS */
-window.EJS_onSaveUpdate = function(payload){
-  latestBatterySave = {
-    hash: payload.hash,
-    save: payload.save,
-    name: (window._progba_lastName || 'game') + ".sav"
-  };
-  persistSaveToLocal(payload.hash, payload.save, latestBatterySave.name);
-  console.log("Battery save updated + persisted", latestBatterySave.name);
-};
-window.EJS_ready = function(){
-  const h = window.EJS_gameHash;
-  const local = loadSaveFromLocal(h);
-  if(local && window.EJS_module && window.EJS_module.writeSaveFiles){
-    window.EJS_module.writeSaveFiles([{name: local.name, data: local.data}])
-      .then(()=> console.log("Restored save from localStorage"))
-      .catch(console.warn);
-  }
-};
-/* --- end save fix --- */
-
-/* load ROM normally */
-function loadRomFile(file){
-  const romUrl = URL.createObjectURL(file);
-  window._progba_lastName = file.name.replace(/\.[^/.]+$/,"");
-  window.EJS_player = "#game";
-  window.EJS_core = "gba";
-  window.EJS_gameUrl = romUrl;
-  window.EJS_pathtodata = CDN_BASE;
-  window.EJS_startOnLoaded = true;
-  const s = document.createElement("script");
-  s.src = LOADER_URL + "?_=" + Date.now();
-  document.body.appendChild(s);
-}
-</script>
+    // Export & Import battery saves
+    async function exportSave() {
+      const save = await EJS_emulatorInstance.saveSav();
+      if (!save) {
+        alert("No save found!");
+        return;
+      }
+      const blob = new Blob([save], {type: 'application/octet-stream'});
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = "codadvance.sav";
+      a.click();
+    }
+    async function importSave() {
+      const input = document.createElement('input');
+      input.type = 'file';
+      input.accept = ".sav";
+      input.onchange = async e => {
+        const file = e.target.files[0];
+        const data = await file.arrayBuffer();
+        await EJS_emulatorInstance.loadSav(new Uint8Array(data));
+        alert("Save imported!");
+      };
+      input.click();
+    }
+  </script>
 </body>
 </html>
