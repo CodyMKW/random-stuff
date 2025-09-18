@@ -13,7 +13,7 @@
     const folderPath = (path) => path.substring(0, path.length - path.split("/").pop().length);
     let scriptPath = (typeof window.EJS_pathtodata === "string") ? window.EJS_pathtodata : folderPath((new URL(document.currentScript.src)).pathname);
     if (!scriptPath.endsWith("/")) scriptPath += "/";
-    //console.log(scriptPath);
+
     function loadScript(file) {
         return new Promise(function(resolve) {
             let script = document.createElement("script");
@@ -78,6 +78,7 @@
         await loadScript("emulator.min.js");
         await loadStyle("emulator.min.css");
     }
+
     const config = {};
     config.gameUrl = window.EJS_gameUrl;
     config.dataPath = scriptPath;
@@ -127,7 +128,7 @@
     let systemLang;
     try {
         systemLang = Intl.DateTimeFormat().resolvedOptions().locale;
-    } catch(e) {} //Ignore
+    } catch(e) {}
     if ((typeof window.EJS_language === "string" && window.EJS_language !== "en-US") || (systemLang && window.EJS_disableAutoLang !== false)) {
         const language = window.EJS_language || systemLang;
         try {
@@ -149,6 +150,7 @@
 
     window.EJS_emulator = new EmulatorJS(EJS_player, config);
     window.EJS_adBlocked = (url, del) => window.EJS_emulator.adBlocked(url, del);
+
     if (typeof window.EJS_ready === "function") {
         window.EJS_emulator.on("ready", window.EJS_ready);
     }
@@ -161,10 +163,30 @@
     if (typeof window.EJS_onSaveState === "function") {
         window.EJS_emulator.on("saveState", window.EJS_onSaveState);
     }
+
+    // === SAVE/LOAD PATCH ===
     if (typeof window.EJS_onLoadSave === "function") {
         window.EJS_emulator.on("loadSave", window.EJS_onLoadSave);
+    } else {
+        window.EJS_emulator.on("loadSave", function() {
+            if (!config.gameId) return null;
+            const data = localStorage.getItem("EJS_" + config.gameId + "_save");
+            if (data) {
+                const binary = atob(data);
+                return new Uint8Array([...binary].map(c => c.charCodeAt(0)));
+            }
+            return null;
+        });
     }
+
     if (typeof window.EJS_onSaveSave === "function") {
         window.EJS_emulator.on("saveSave", window.EJS_onSaveSave);
+    } else {
+        window.EJS_emulator.on("saveSave", function(saveData) {
+            if (!config.gameId) return;
+            const b64 = btoa(String.fromCharCode(...saveData));
+            localStorage.setItem("EJS_" + config.gameId + "_save", b64);
+            console.log("Saved:", config.gameId);
+        });
     }
 })();
