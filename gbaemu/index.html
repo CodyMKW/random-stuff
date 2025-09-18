@@ -53,7 +53,7 @@
       overflow: hidden;
       position: relative;
     }
-    #load-rom, #download-save, #upload-save {
+    button {
       background: #ff6b35;
       color: #000;
       border: none;
@@ -63,7 +63,7 @@
       font-weight: bold;
       margin: 5px;
     }
-    #load-rom:hover, #download-save:hover, #upload-save:hover {
+    button:hover {
       background: #e55a2b;
     }
     #game {
@@ -111,6 +111,8 @@
     <button id="load-rom">Load GBA ROM</button>
     <button id="download-save">Download Save</button>
     <button id="upload-save">Upload Save</button>
+    <button id="save-state">Save State</button>
+    <button id="load-state">Load State</button>
   </div>
   
   <div id="emulator-container">
@@ -122,9 +124,10 @@
     EJS_core = 'mgba';
     EJS_biosUrl = 'gba-bios.bin';
     EJS_pathtodata = 'data/';
+    EJS_autoSave = true; // Enable autosave for SRAM
     let currentGameId = null;
 
-    // Helpers
+    // --- Base64 helpers ---
     function b64Encode(bytes) {
       let binary = "";
       for (let i = 0; i < bytes.length; i++) {
@@ -141,17 +144,6 @@
       return bytes;
     }
 
-    // Global SRAM hooks
-    EJS_onSaveSRAM = function (saveBytes) {
-      if (!currentGameId) return;
-      localStorage.setItem("EJS_" + currentGameId + "_sram", b64Encode(saveBytes));
-    };
-    EJS_onLoadSRAM = function () {
-      if (!currentGameId) return null;
-      const data = localStorage.getItem("EJS_" + currentGameId + "_sram");
-      return data ? b64Decode(data) : null;
-    };
-
     // Load ROM
     document.getElementById('load-rom').addEventListener('click', function () {
       const input = document.createElement('input');
@@ -164,6 +156,15 @@
           currentGameId = file.name.replace(/\.[^/.]+$/, "");
           EJS_gameUrl = url;
           EJS_gameID = currentGameId;
+
+          // SRAM hooks
+          EJS_onSaveSRAM = function (saveBytes) {
+            localStorage.setItem("EJS_" + currentGameId + "_sram", b64Encode(saveBytes));
+          };
+          EJS_onLoadSRAM = function () {
+            const data = localStorage.getItem("EJS_" + currentGameId + "_sram");
+            return data ? b64Decode(data) : null;
+          };
 
           document.querySelector('#game').innerHTML = '';
           if (typeof EJS_start !== 'undefined') {
@@ -183,10 +184,7 @@
 
     // Download Save
     document.getElementById('download-save').addEventListener('click', function () {
-      if (!currentGameId) {
-        alert("No game loaded!");
-        return;
-      }
+      if (!currentGameId) return alert("No game loaded!");
       const key = "EJS_" + currentGameId + "_sram";
       const saveData = localStorage.getItem(key);
       if (saveData) {
@@ -206,10 +204,7 @@
 
     // Upload Save
     document.getElementById('upload-save').addEventListener('click', function () {
-      if (!currentGameId) {
-        alert("Load a game before uploading a save!");
-        return;
-      }
+      if (!currentGameId) return alert("Load a game before uploading a save!");
       const input = document.createElement('input');
       input.type = 'file';
       input.accept = '.sav';
@@ -226,6 +221,40 @@
         }
       };
       input.click();
+    });
+
+    // Save State
+    document.getElementById('save-state').addEventListener('click', async function () {
+      if (!currentGameId || typeof EJS_emulator === 'undefined') return alert("No game running!");
+      const state = await EJS_emulator.saveState();
+      localStorage.setItem("EJS_" + currentGameId + "_state", b64Encode(state));
+      alert("State saved!");
+    });
+
+    // Load State
+    document.getElementById('load-state').addEventListener('click', async function () {
+      if (!currentGameId || typeof EJS_emulator === 'undefined') return alert("No game running!");
+      const data = localStorage.getItem("EJS_" + currentGameId + "_state");
+      if (data) {
+        await EJS_emulator.loadState(b64Decode(data));
+        alert("State loaded!");
+      } else {
+        alert("No state found!");
+      }
+    });
+
+    // Force save on unload (backup safety)
+    window.addEventListener('beforeunload', () => {
+      if (typeof EJS_emulator !== 'undefined' && currentGameId) {
+        try {
+          const sram = EJS_emulator.SRAM;
+          if (sram) {
+            localStorage.setItem("EJS_" + currentGameId + "_sram", b64Encode(sram));
+          }
+        } catch (e) {
+          console.warn("Could not save SRAM on unload", e);
+        }
+      }
     });
   </script>
 
