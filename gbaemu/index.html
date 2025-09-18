@@ -72,9 +72,74 @@
 </header>
 
 <div class="layout">
-  <!-- LEFT controls same as before -->
-  <!-- RIGHT game panel same as before -->
-</div>
+  <!-- LEFT: Controls -->
+  <div class="card controls">
+    <div class="section">
+      <div class="dropzone" id="dropzone" tabindex="0">
+        <div style="font-size:14px;font-weight:700">Drop a .gba ROM here</div>
+        <div class="muted" style="margin-top:8px">Or click to choose — supports drag & drop, and will keep your saves local.</div>
+        <input id="romPicker" accept=".gba,.zip" type="file" style="display:none">
+      </div>
+    </div>
+
+    <div class="section">
+      <div style="display:flex;gap:8px;align-items:center;justify-content:space-between">
+        <div>
+          <div style="font-weight:700">Game Status</div>
+          <div class="muted small" id="status">No game loaded</div>
+        </div>
+        <div>
+          <button class="btn ghost" id="restartBtn">Restart</button>
+          <button class="btn ghost" id="pauseBtn">Pause</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="section">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+        <div style="font-weight:700">Battery Save</div>
+        <div class="muted small">Pokémon-friendly</div>
+      </div>
+      <div style="display:flex;gap:8px;margin-bottom:8px">
+        <button class="btn" id="exportSaveBtn">Export Latest Save</button>
+        <label class="fileish">
+          Import Save <input id="importSave" type="file" accept=".sav" style="display:none" />
+        </label>
+      </div>
+      <div class="muted small">If the emulator writes a battery save, this panel will show it and allow export.</div>
+      <div style="margin-top:8px" id="savePreview"></div>
+    </div>
+
+    <div class="section">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+        <div style="font-weight:700">Save States (download / restore)</div>
+        <div class="muted small">Quick download slots</div>
+      </div>
+
+      <div class="slots" id="slots">
+        <!-- slots injected -->
+      </div>
+      <div style="margin-top:8px" class="muted small">Use the built-in emulator controls to create a save state (or use emulator UI). When a save-state is created, you'll be invited to download it here.</div>
+    </div>
+
+    <div class="section">
+      <div style="font-weight:700;margin-bottom:6px">Controls & Mapping</div>
+      <div class="mapping" id="mapping">
+        <div class="row"><div>A</div><div class="kbd">Z / X / Gamepad A</div></div>
+        <div class="row"><div>B</div><div class="kbd">X / C / Gamepad B</div></div>
+        <div class="row"><div>Select</div><div class="kbd">V / Gamepad Select</div></div>
+        <div class="row"><div>Start</div><div class="kbd">Enter / Gamepad Start</div></div>
+        <div class="row"><div>Up/Down/Left/Right</div><div class="kbd">Arrow keys / D-pad</div></div>
+        <div class="row"><div>Quick Save</div><div class="kbd">F5</div></div>
+        <div class="row"><div>Quick Load</div><div class="kbd">F8</div></div>
+        <div class="row"><div>Screen Shot</div><div class="kbd">Ctrl+S</div></div>
+      </div>
+    </div>
+
+    <div class="section">
+      <div style="font-weight:700;margin-bottom:6px">Touch Controls</div>
+      <div class="touchpad">
+        <div class="muted small">For phones, an on-screen gamepad will appear automatically. You can also toggle it with the emulator UI.</div>
 
 <script>
 const CDN_BASE = 'https://cdn.emulatorjs.org/stable/data/';
