@@ -202,18 +202,8 @@
 </div>
 
 <script>
-/*
-  ProGBA — EmulatorJS wrapper
-  Uses EmulatorJS CDN (stable) at https://cdn.emulatorjs.org/stable/data/loader.js
-  Works by: when user selects a ROM file, create an object URL, set EJS variables, load loader.js.
-  If a game is already running, we attempt to call EJS_terminate (if exposed) before loading a new instance.
-  Save hooks: EJS_onSaveUpdate (battery save buffer), EJS_onSaveState (save-state generation)
-  This page tries to be robust and friendly.
-*/
-
 const CDN_BASE = 'https://cdn.emulatorjs.org/stable/data/';
 const LOADER_URL = CDN_BASE + 'loader.js';
-
 const dropzone = document.getElementById('dropzone');
 const romPicker = document.getElementById('romPicker');
 const statusEl = document.getElementById('status');
@@ -230,10 +220,10 @@ const pauseBtn = document.getElementById('pauseBtn');
 const dumpSaves = document.getElementById('dumpSaves');
 const clearCache = document.getElementById('clearCache');
 const savePreview = document.getElementById('savePreview');
+
 let latestBatterySave = null;
 let saveStateSlots = new Array(10).fill(null);
 
-/* UI helpers */
 function logActivity(msg){
   const time = new Date().toLocaleTimeString();
   const el = document.createElement('div');
@@ -244,17 +234,15 @@ function logActivity(msg){
   activityLog.prepend(el);
 }
 
-function setStatus(s){
-  statusEl.textContent = s;
-}
+function setStatus(s){ statusEl.textContent = s; }
 
-/* populate slots UI */
 function renderSlots(){
   slotsContainer.innerHTML = '';
   for(let i=0;i<10;i++){
     const s = document.createElement('div');
     s.className='slot';
-    s.innerHTML = `<div class="title">Slot ${i}</div>
+    s.innerHTML = `
+      <div class="title">Slot ${i}</div>
       <div style="margin-top:8px">
         <button data-slot="${i}" class="btn ghost btn-save">Download</button>
         <button data-slot="${i}" class="btn ghost btn-load">Upload</button>
@@ -264,21 +252,22 @@ function renderSlots(){
 }
 renderSlots();
 
-/* slot click handlers (download/upload) */
 slotsContainer.addEventListener('click', e=>{
   const saveBtn = e.target.closest('.btn-save');
   const loadBtn = e.target.closest('.btn-load');
+
   if(saveBtn){
     const slot = Number(saveBtn.dataset.slot);
-    if(!saveStateSlots[slot]) { alert('No save state in that slot yet. Use emulator UI to create a save state.'); return; }
+    if(!saveStateSlots[slot]) { alert('No save state in that slot.'); return; }
     const blob = new Blob([saveStateSlots[slot].data], {type:'application/octet-stream'});
     const a = document.createElement('a');
     a.href = URL.createObjectURL(blob);
-    a.download = (saveStateSlots[slot].name || `save-state-slot-${slot}.state`);
+    a.download = saveStateSlots[slot].name || `save-state-slot-${slot}.state`;
     a.click();
     URL.revokeObjectURL(a.href);
     logActivity(`Downloaded save-state from slot ${slot}`);
   }
+
   if(loadBtn){
     const slot = Number(loadBtn.dataset.slot);
     const inp = document.createElement('input');
@@ -289,18 +278,16 @@ slotsContainer.addEventListener('click', e=>{
       const reader = new FileReader();
       reader.onload = ()=> {
         const buf = new Uint8Array(reader.result);
-        // we tell emulator to load the state by triggering a drop into the emulator -- EmulatorJS supports loading state files dropped onto the running emulator.
-        // We'll attempt to use EJS_module/loader if exposed; otherwise instruct user.
-        if(window.EJS_module && window.EJS_module.loadStateFromBuffer){
+        if(window.EJS_module && typeof window.EJS_module.loadStateFromBuffer === 'function'){
           try {
             window.EJS_module.loadStateFromBuffer(buf);
             logActivity(`Loaded save-state into emulator from file ${f.name}`);
           } catch(err){
             console.warn(err);
-            alert('Could not ask emulator to load the state programmatically. Try dragging the .state file to the game area.');
+            alert('State load failed programmatically. Drag .state file to game viewport.');
           }
         } else {
-          alert('Programmatic state-load not available in this build. Drag the .state file directly onto the game viewport to load it.');
+          alert('State load API not available. Drag .state file to game viewport.');
         }
       };
       reader.readAsArrayBuffer(f);
@@ -309,253 +296,147 @@ slotsContainer.addEventListener('click', e=>{
   }
 });
 
-/* export battery save */
+// Battery save export/import
 exportSaveBtn.addEventListener('click', ()=>{
-  if(!latestBatterySave){ alert('No battery save captured yet. Play the game (save in-game) and the page will detect it.'); return; }
+  if(!latestBatterySave){ alert('No battery save yet.'); return; }
   const blob = new Blob([latestBatterySave.save], {type:'application/octet-stream'});
   const a = document.createElement('a');
   a.href = URL.createObjectURL(blob);
-  // name from metadata if available
-  const suggested = latestBatterySave.name || 'game_save.sav';
-  a.download = suggested;
+  a.download = latestBatterySave.name || 'game_save.sav';
   a.click();
   URL.revokeObjectURL(a.href);
   logActivity('Exported battery save (.sav)');
 });
 
-/* import battery save */
 importSave.addEventListener('change', e=>{
   const f = e.target.files[0];
   if(!f) return;
   const reader = new FileReader();
-  reader.onload = ()=> {
+  reader.onload = async ()=>{
     const buf = new Uint8Array(reader.result);
-    // try feeding to emulator via EJS_module.saveFiles or similar if available.
-    if(window.EJS_module && window.EJS_module.writeSaveFiles){
+    if(window.EJS_module && typeof window.EJS_module.writeSaveFiles === 'function'){
       try{
-        window.EJS_module.writeSaveFiles([{name: f.name, data: buf}]).then(()=>{
-          alert('Imported save into emulator memory. Restart the game if needed.');
-          logActivity(`Imported battery save ${f.name}`);
-        }).catch(err=> {
-          console.warn(err);
-          alert('Import failed via API. Try dropping the .sav onto the game area instead.');
-        });
+        await window.EJS_module.writeSaveFiles([{name: f.name, data: buf}]);
+        logActivity(`Imported battery save: ${f.name}`);
+        alert('Imported save. Restart game if needed.');
       } catch(err){
         console.warn(err);
-        alert('Import failed — emulator API unavailable. Drag the .sav file into the game area to import instead.');
+        alert('Import failed via API. Drag .sav onto game viewport.');
       }
     } else {
-      alert('Programmatic import not available. Drop the .sav file onto the game area to import.');
+      alert('API unavailable. Drag .sav file to game viewport.');
     }
   };
   reader.readAsArrayBuffer(f);
 });
 
-/* Drag & drop + chooser */
+// ROM load
 dropzone.addEventListener('click', ()=> romPicker.click());
 romPicker.addEventListener('change', ()=> handleFiles(romPicker.files));
-['dragenter','dragover'].forEach(ev=> dropzone.addEventListener(ev, e=> { e.preventDefault(); dropzone.style.borderColor = 'rgba(255,255,255,0.12)'; }));
-['dragleave','drop'].forEach(ev=> dropzone.addEventListener(ev, e=> { e.preventDefault(); dropzone.style.borderColor = 'rgba(255,255,255,0.04)'; }));
-dropzone.addEventListener('drop', e=>{
-  const files = e.dataTransfer.files;
-  handleFiles(files);
-});
+['dragenter','dragover'].forEach(ev=> dropzone.addEventListener(ev,e=>{ e.preventDefault(); dropzone.style.borderColor='rgba(255,255,255,0.12)'; }));
+['dragleave','drop'].forEach(ev=> dropzone.addEventListener(ev,e=>{ e.preventDefault(); dropzone.style.borderColor='rgba(255,255,255,0.04)'; }));
+dropzone.addEventListener('drop', e=> handleFiles(e.dataTransfer.files));
 
 function handleFiles(files){
   if(!files || files.length === 0) return;
   const file = files[0];
-  // accept .zip or .gba; if zip, we just pass to emulator which may handle it
   const ext = file.name.split('.').pop().toLowerCase();
-  if(!['gba','zip','.gba','gm','bin'].includes(ext) && !file.name.toLowerCase().includes('.gba')) {
-    if(!confirm('File does not look like a .gba ROM. Continue anyway?')) return;
+  if(!['gba','zip','gm','bin'].includes(ext)) {
+    if(!confirm('File does not look like a .gba ROM. Continue?')) return;
   }
   loadRomFile(file);
 }
 
-/* dynamically load EmulatorJS with EJS variables */
 function loadRomFile(file){
   setStatus('Preparing ROM…');
-
-  // Clear any previous loader instances (if API exposed)
-  if(window.EJS_terminate) {
-    try {
-      window.EJS_terminate();
-      console.log('Called EJS_terminate to stop previous instance.');
-    } catch(e){
-      console.warn('EJS_terminate call failed', e);
-    }
-  }
-
-  // revoke old blob urls we used
+  if(window.EJS_terminate){ try{ window.EJS_terminate(); } catch(e){console.warn(e);} }
   if(window._progba_lastRomURL){ try{ URL.revokeObjectURL(window._progba_lastRomURL);}catch(e){} }
   const romUrl = URL.createObjectURL(file);
   window._progba_lastRomURL = romUrl;
+  window.EJS_player='#game';
+  window.EJS_core='gba';
+  window.EJS_gameUrl=romUrl;
+  window.EJS_pathtodata=CDN_BASE;
+  window.EJS_startOnLoaded=true;
+  window.EJS_color='#ff6b6b';
 
-  // set global EJS vars as required by loader
-  window.EJS_player = '#game';
-  window.EJS_core = 'gba'; // use mGBA core
-  window.EJS_gameUrl = romUrl;
-  // path to data folder on emulatorjs CDN
-  window.EJS_pathtodata = CDN_BASE;
-  // start immediately after load
-  window.EJS_startOnLoaded = true;
-  // optional nice theming
-  window.EJS_color = '#ff6b6b';
-
-  // hooks
   window.EJS_ready = function(){
     setStatus('Emulator ready — playing');
     gameTitle.textContent = file.name;
     gameMeta.textContent = `Core: gba • file: ${file.name}`;
-    runStateEl.textContent = 'running';
+    runStateEl.textContent='running';
     logActivity(`Game started: ${file.name}`);
   };
 
-  window.EJS_onGameStart = function(){
-    runStateEl.textContent = 'running';
-  };
-
-  // battery save hook: save updates (e.g., Pokemon game battery save writes)
   window.EJS_onSaveUpdate = function(payload){
-    // payload: {hash, save, screenshot, format}
-    latestBatterySave = {
-      hash: payload.hash,
-      save: payload.save,
-      screenshot: payload.screenshot,
-      format: payload.format,
-      name: (file.name.replace(/\.[^/.]+$/, "") + '.sav')
+    latestBatterySave = { 
+      hash: payload.hash, 
+      save: payload.save instanceof Uint8Array ? payload.save : new Uint8Array(payload.save), 
+      screenshot: payload.screenshot, 
+      format: payload.format, 
+      name: file.name.replace(/\.[^/.]+$/,'')+'.sav' 
     };
-    savePreview.innerHTML = `<div style="display:flex;gap:8px;align-items:center"><div style="width:48px;height:48px;background:url(${payload.screenshot}) center/cover;border-radius:6px"></div><div><div style="font-weight:700">${latestBatterySave.name}</div><div class="muted small">Hash: ${payload.hash}</div></div></div>`;
+    savePreview.innerHTML = `<div style="display:flex;gap:8px;align-items:center">
+      <div style="width:48px;height:48px;background:url(${payload.screenshot}) center/cover;border-radius:6px"></div>
+      <div><div style="font-weight:700">${latestBatterySave.name}</div><div class="muted small">Hash: ${payload.hash}</div></div>
+    </div>`;
     logActivity('Detected battery save update — export available.');
   };
 
-  // when emulator creates a save-state (UI triggered), EJS_onSaveState will receive [screenshot, saveStateBuffer]
   window.EJS_onSaveState = function(arr){
-    try {
-      const screenshot = arr[0]; // data URL
-      const saveBuf = arr[1]; // Uint8Array or ArrayBuffer
-      // store into first free slot
-      const slotIndex = saveStateSlots.findIndex(s=>!s);
-      const idx = slotIndex === -1 ? 0 : slotIndex;
-      saveStateSlots[idx] = {data: (saveBuf instanceof Uint8Array ? saveBuf : new Uint8Array(saveBuf)), name: (gameTitle.textContent ? `${gameTitle.textContent.replace(/\.[^/.]+$/,'')}_slot${idx}.state` : `save_slot_${idx}.state`), when: Date.now()};
+    try{
+      const screenshot=arr[0], saveBuf=arr[1];
+      const slotIndex = saveStateSlots.findIndex(s=>!s); const idx = slotIndex===-1?0:slotIndex;
+      saveStateSlots[idx]={data: saveBuf instanceof Uint8Array ? saveBuf : new Uint8Array(saveBuf), name: `${file.name.replace(/\.[^/.]+$/,'')}_slot${idx}.state`, when: Date.now()};
       logActivity(`Save-state created (slot ${idx})`);
-      // show a small preview in activity
-      const node = document.createElement('div');
-      node.style.display='flex';
-      node.style.gap='8px';
-      node.style.alignItems='center';
-      node.innerHTML = `<div style="width:58px;height:40px;background-image:url(${screenshot});background-size:cover;border-radius:6px"></div><div style="font-size:13px"><strong>Saved slot ${idx}</strong><div class="muted small">${new Date().toLocaleTimeString()}</div></div>`;
-      activityLog.prepend(node);
-    } catch(e){
-      console.warn('EJS_onSaveState handler error', e);
-    }
+    } catch(e){ console.warn(e); }
   };
 
-  // when emulator loads a save-state via UI (not programmatic) it can call this hook
-  window.EJS_onLoadState = function(){
-    logActivity('A save-state was loaded by the emulator UI');
-  };
-
-  // load loader.js dynamically (cache buster so reloading new games works)
-  const s = document.createElement('script');
-  s.src = LOADER_URL + '?_=' + Date.now();
-  s.onload = ()=> {
-    setStatus('ROM loaded; emulator initializing…');
-  };
-  s.onerror = (e)=> {
-    setStatus('Failed to load emulator core. Check console.');
-    alert('Failed to load EmulatorJS loader script from CDN. Make sure you are online and serving this page via HTTP(S).');
-    console.error('loader.js error', e);
-  };
+  const s=document.createElement('script');
+  s.src=LOADER_URL+'?_='+Date.now();
+  s.onload=()=>{ setStatus('ROM loaded; emulator initializing…'); };
+  s.onerror=e=>{ setStatus('Failed to load emulator core.'); alert('Check console.'); console.error(e); };
   document.body.appendChild(s);
 }
 
-/* small utilities */
 restartBtn.addEventListener('click', ()=>{
-  if(window.EJS_terminate){ try { window.EJS_terminate(); setStatus('Restarting — reloading ROM…'); setTimeout(()=> {
-      if(window._progba_lastRomURL){
-        const fName = gameTitle.textContent || 'reloaded.gba';
-        // re-trigger load by creating new script element
-        const s = document.createElement('script');
-        s.src = LOADER_URL + '?_reboot=' + Date.now();
-        s.onload = ()=> setStatus('Restarted');
-        document.body.appendChild(s);
-        logActivity('Restart requested');
-      } else setStatus('No ROM to restart');
-    }, 200);
-  } catch(e){ console.warn(e); alert('Restart failed.'); }
-  } else {
-    alert('Restart not available on this build.');
-  }
+  if(window.EJS_terminate){ try{ window.EJS_terminate(); setStatus('Restarting…'); setTimeout(()=> { if(window._progba_lastRomURL){ loadRomFile({name: gameTitle.textContent, url: window._progba_lastRomURL}); logActivity('Restart requested'); } },200); }catch(e){alert('Restart failed');} }
 });
+
 pauseBtn.addEventListener('click', ()=>{
-  if(window.EJS_module && window.EJS_module.pause){
-    try{ window.EJS_module.pause(); runStateEl.textContent = 'paused'; setStatus('Paused'); }catch(e){ alert('Pause API failed.'); }
-  } else {
-    alert('Pause API unavailable. Use emulator UI.');
-  }
+  if(window.EJS_module && typeof window.EJS_module.pause==='function'){ try{ window.EJS_module.pause(); runStateEl.textContent='paused'; setStatus('Paused'); }catch(e){alert('Pause failed');} } else { alert('Pause API unavailable'); }
 });
 
 dumpSaves.addEventListener('click', async ()=>{
-  let names = [];
-  try {
-    if(window.EJS_module && window.EJS_module.readSaveFiles){
+  try{
+    if(window.EJS_module && typeof window.EJS_module.readSaveFiles==='function'){
       const files = await window.EJS_module.readSaveFiles();
-      names = files.map(f=>f.name + ' (' + (f.data ? f.data.byteLength : '0') + ' bytes)');
-    } else {
-      names = ['Emulator API not exposed — cannot list saves programmatically.'];
-    }
-  } catch(e){
-    names = ['Error reading saves: ' + e.message];
-  }
-  alert('Save files:\n' + names.join('\n'));
+      alert('Save files:\n'+files.map(f=>f.name+' ('+(f.data?f.data.byteLength:'0')+' bytes)').join('\n'));
+    } else alert('API unavailable.');
+  } catch(e){ alert('Error reading saves: '+e.message); }
 });
 
 clearCache.addEventListener('click', ()=>{
-  if(confirm('Clear emulator cache & local saves for this instance? This will remove cached game files and saves stored by EmulatorJS for this origin.')) {
-    try {
-      if(window.EJS_module && window.EJS_module.clearCache){
-        window.EJS_module.clearCache().then(()=> alert('Cleared emulator cache. Reload the page.'), ()=> alert('Failed to clear cache via API. Try clearing site data in browser.'));
-      } else {
-        alert('API not available. Clear site data in browser storage manually.');
-      }
-    } catch(e){
-      alert('Clear cache action failed: ' + e.message);
-    }
+  if(confirm('Clear emulator cache & local saves?')){
+    if(window.EJS_module && typeof window.EJS_module.clearCache==='function'){
+      window.EJS_module.clearCache().then(()=> alert('Cache cleared. Reload page.'), ()=> alert('Failed to clear.'));
+    } else alert('API not available. Clear manually.');
   }
 });
 
-/* FPS ticker if available */
 setInterval(()=>{
-  if(window.EJS_module && window.EJS_module.getFPS){
-    try{
-      fpsEl.textContent = Math.round(window.EJS_module.getFPS());
-    }catch(e){}
+  if(window.EJS_module && typeof window.EJS_module.getFPS==='function'){
+    try{ fpsEl.textContent=Math.round(window.EJS_module.getFPS()); } catch(e){}
   }
 },1000);
 
-/* keyboard quick save/load convenience (F5 / F8). We try to trigger emulator's quick save/load via dispatching keyboard events (works in many builds). */
 window.addEventListener('keydown', e=>{
-  if(e.key === 'F5'){ e.preventDefault(); // quick save
-    // attempt to call any exposed helper
-    if(window.EJS_module && window.EJS_module.quickSave){ try { window.EJS_module.quickSave(); logActivity('Triggered quick save (API)'); return; } catch(e){} }
-    // fallback: dispatch key sequence
-    const evt = new KeyboardEvent('keydown', {key: 'F5', bubbles:true,cancelable:true});
-    document.dispatchEvent(evt);
-    logActivity('Triggered quick save (dispatch)');
-  }
-  if(e.key === 'F8'){ e.preventDefault();
-    if(window.EJS_module && window.EJS_module.quickLoad){ try { window.EJS_module.quickLoad(); logActivity('Triggered quick load (API)'); return; } catch(e){} }
-    const evt = new KeyboardEvent('keydown', {key: 'F8', bubbles:true,cancelable:true});
-    document.dispatchEvent(evt);
-    logActivity('Triggered quick load (dispatch)');
-  }
+  if(e.key==='F5'){ e.preventDefault(); if(window.EJS_module && typeof window.EJS_module.quickSave==='function'){ try{ window.EJS_module.quickSave(); logActivity('Quick save triggered'); return; }catch{} } document.dispatchEvent(new KeyboardEvent('keydown',{key:'F5',bubbles:true,cancelable:true})); logActivity('Quick save dispatched'); }
+  if(e.key==='F8'){ e.preventDefault(); if(window.EJS_module && typeof window.EJS_module.quickLoad==='function'){ try{ window.EJS_module.quickLoad(); logActivity('Quick load triggered'); return; }catch{} } document.dispatchEvent(new KeyboardEvent('keydown',{key:'F8',bubbles:true,cancelable:true})); logActivity('Quick load dispatched'); }
 });
 
-/* friendly hint */
-logActivity('Ready. Drop a Pokémon GBA ROM (or any .gba) to start.');
+logActivity('Ready. Drop a Pokémon GBA ROM to start.');
 setStatus('Awaiting ROM…');
-
 </script>
 
 </body>
