@@ -1,263 +1,563 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>GBA Emulator - Nintendo's Finest, In Your Browser</title>
-  <style>
-    body {
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      background-color: #1a1a1a;
-      color: #e0e0e0;
-      margin: 0;
-      padding: 20px;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-    }
-    h1 {
-      color: #ff6b35;
-      text-align: center;
-      margin-bottom: 10px;
-    }
-    .controls-section {
-      background: #2a2a2a;
-      border-radius: 8px;
-      padding: 15px;
-      margin-bottom: 20px;
-      width: 100%;
-      max-width: 640px;
-      box-shadow: 0 4px 8px rgba(0,0,0,0.3);
-    }
-    .controls-table {
-      width: 100%;
-      border-collapse: collapse;
-      margin-top: 10px;
-    }
-    .controls-table th, .controls-table td {
-      padding: 8px;
-      text-align: left;
-      border-bottom: 1px solid #404040;
-    }
-    .controls-table th {
-      background: #ff6b35;
-      color: #000;
-    }
-    #emulator-container {
-      width: 640px;
-      height: 480px;
-      max-width: 100%;
-      background: #000;
-      border: 2px solid #ff6b35;
-      border-radius: 8px;
-      overflow: hidden;
-      position: relative;
-    }
-    button {
-      background: #ff6b35;
-      color: #000;
-      border: none;
-      padding: 10px 20px;
-      border-radius: 4px;
-      cursor: pointer;
-      font-weight: bold;
-      margin: 5px;
-    }
-    button:hover {
-      background: #e55a2b;
-    }
-    #game {
-      width: 100%;
-      height: 100%;
-    }
-    .note {
-      text-align: center;
-      font-size: 0.9em;
-      color: #888;
-      margin-top: 10px;
-    }
-  </style>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>ProGBA — EmulatorJS GBA (Maple build)</title>
+<link rel="icon" href="data:,🍁" />
+<style>
+  :root{
+    --bg:#0b0f14; --panel:#0f1720; --accent:#ff6b6b; --muted:#9aa5b1;
+    --glass: rgba(255,255,255,0.04);
+  }
+  html,body{height:100%;margin:0;font-family:Inter,system-ui,Segoe UI,Roboto,"Helvetica Neue",Arial;}
+  body{
+    background:
+      radial-gradient(1200px 400px at 10% 10%, rgba(255,107,107,0.06), transparent 8%),
+      linear-gradient(180deg,#071018 0%, #071623 45%, #051018 100%);
+    color:#e6eef6;
+    -webkit-font-smoothing:antialiased;
+    padding:24px;
+    box-sizing:border-box;
+  }
+
+  header{display:flex;gap:16px;align-items:center;margin-bottom:18px}
+  .brand{display:flex;gap:12px;align-items:center}
+  .logo{width:52px;height:52px;background:linear-gradient(135deg,#ff9a9e,#fecfef);border-radius:14px;display:flex;align-items:center;justify-content:center;font-weight:700;color:#111}
+  h1{font-size:20px;margin:0}
+  p.lead{margin:0;color:var(--muted);font-size:13px}
+
+  .layout{display:grid;grid-template-columns: 420px 1fr; gap:20px; align-items:start;}
+  .card{background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01)); border-radius:12px;padding:14px;box-shadow: 0 6px 18px rgba(2,6,23,0.6); border:1px solid rgba(255,255,255,0.03)}
+
+  /* left panel */
+  .controls .section{margin-bottom:12px}
+  .dropzone{
+    border:2px dashed rgba(255,255,255,0.04);
+    padding:18px;border-radius:10px;text-align:center;cursor:pointer;background:var(--glass);
+  }
+  .muted{color:var(--muted);font-size:13px}
+  .btn{
+    display:inline-flex;align-items:center;gap:8px;padding:10px 12px;border-radius:8px;background:linear-gradient(90deg,var(--accent),#ffa77a);color:#07201a;font-weight:600;border:none;cursor:pointer;
+  }
+  .btn.ghost{background:transparent;border:1px solid rgba(255,255,255,0.04);color:var(--muted);font-weight:600}
+  .flex{display:flex;gap:8px;align-items:center}
+  .kbd{font-family:monospace;background:rgba(255,255,255,0.03);border-radius:6px;padding:6px 8px;font-size:12px;color:var(--muted)}
+  .small{font-size:13px}
+
+  /* right panel */
+  #gameWrap{width:100%;height:520px;background:#000;border-radius:10px;overflow:hidden;display:flex;align-items:center;justify-content:center;position:relative}
+  #game{width:100%;height:100%;}
+  .meta{display:flex;justify-content:space-between;margin-top:10px;gap:8px;align-items:center}
+  .info{color:var(--muted);font-size:13px}
+
+  /* save slots grid */
+  .slots{display:grid;grid-template-columns:repeat(5,1fr);gap:8px}
+  .slot{background:rgba(255,255,255,0.02);padding:8px;border-radius:8px;text-align:center;font-size:13px}
+  .slot .title{font-weight:700;color:#fff}
+  .save-list{max-height:160px;overflow:auto;padding:6px;border-radius:8px;border:1px dashed rgba(255,255,255,0.02)}
+  label.fileish{display:inline-block;padding:10px;border-radius:8px;background:rgba(255,255,255,0.02);cursor:pointer}
+
+  footer{margin-top:18px;color:var(--muted);font-size:13px}
+  .unhinge{ position:absolute; right:14px; top:12px; font-size:12px; color: #071018; background: #ffdede; padding:6px 8px; border-radius:20px; transform: rotate(-6deg); box-shadow: 0 6px 12px rgba(0,0,0,0.3)}
+  .right-col-top{display:flex;gap:10px;align-items:center}
+  .mapping{display:grid;grid-template-columns:repeat(2,1fr);gap:6px;margin-top:8px}
+  .mapping .row{display:flex;justify-content:space-between;padding:6px;background:rgba(255,255,255,0.01);border-radius:6px;font-size:13px}
+  .touchpad{display:none}
+  @media (max-width:1100px){
+    .layout{grid-template-columns:1fr; }
+    #gameWrap{height:420px}
+    .touchpad{display:block;margin-top:8px}
+  }
+</style>
 </head>
 <body>
-  <h1>Game Boy Advance Emulator</h1>
-  <p class="note">The handheld that Xbox wishes it could be. Load your ROM and pretend you're outdoors.</p>
-  
-  <div class="controls-section">
-    <h2>Controls</h2>
-    <table class="controls-table">
-      <thead>
-        <tr>
-          <th>GBA Button</th>
-          <th>Keyboard</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr><td>D-Pad Up</td><td>↑ Arrow</td></tr>
-        <tr><td>D-Pad Down</td><td>↓ Arrow</td></tr>
-        <tr><td>D-Pad Left</td><td>← Arrow</td></tr>
-        <tr><td>D-Pad Right</td><td>→ Arrow</td></tr>
-        <tr><td>A Button</td><td>Z</td></tr>
-        <tr><td>B Button</td><td>X</td></tr>
-        <tr><td>L Trigger</td><td>A</td></tr>
-        <tr><td>R Trigger</td><td>S</td></tr>
-        <tr><td>Start</td><td>Enter</td></tr>
-        <tr><td>Select</td><td>\ (Backslash)</td></tr>
-      </tbody>
-    </table>
-    <p class="note">Full-screen? F11. Volume? Your speakers aren't trash, are they?</p>
+<header>
+  <div class="brand">
+    <div class="logo">PG</div>
+    <div>
+      <h1>ProGBA — EmulatorJS (Maple build)</h1>
+      <p class="lead">GBA in the browser • Drag ROMs in • Battery saves & Save-States • Professional controls</p>
+    </div>
   </div>
-  
+  <div style="margin-left:auto;text-align:right">
+    <div class="muted">Powered by <strong>EmulatorJS</strong></div>
+    <div style="font-size:12px;color:var(--muted)">CDN: stable • Core: mGBA</div>
+  </div>
+</header>
+
+<div class="layout">
+  <!-- LEFT: Controls -->
+  <div class="card controls">
+    <div class="section">
+      <div class="dropzone" id="dropzone" tabindex="0">
+        <div style="font-size:14px;font-weight:700">Drop a .gba ROM here</div>
+        <div class="muted" style="margin-top:8px">Or click to choose — supports drag & drop, and will keep your saves local.</div>
+        <input id="romPicker" accept=".gba,.zip" type="file" style="display:none">
+      </div>
+    </div>
+
+    <div class="section">
+      <div style="display:flex;gap:8px;align-items:center;justify-content:space-between">
+        <div>
+          <div style="font-weight:700">Game Status</div>
+          <div class="muted small" id="status">No game loaded</div>
+        </div>
+        <div>
+          <button class="btn ghost" id="restartBtn">Restart</button>
+          <button class="btn ghost" id="pauseBtn">Pause</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="section">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+        <div style="font-weight:700">Battery Save</div>
+        <div class="muted small">Pokémon-friendly</div>
+      </div>
+      <div style="display:flex;gap:8px;margin-bottom:8px">
+        <button class="btn" id="exportSaveBtn">Export Latest Save</button>
+        <label class="fileish">
+          Import Save <input id="importSave" type="file" accept=".sav" style="display:none" />
+        </label>
+      </div>
+      <div class="muted small">If the emulator writes a battery save, this panel will show it and allow export.</div>
+      <div style="margin-top:8px" id="savePreview"></div>
+    </div>
+
+    <div class="section">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+        <div style="font-weight:700">Save States (download / restore)</div>
+        <div class="muted small">Quick download slots</div>
+      </div>
+
+      <div class="slots" id="slots">
+        <!-- slots injected -->
+      </div>
+      <div style="margin-top:8px" class="muted small">Use the built-in emulator controls to create a save state (or use emulator UI). When a save-state is created, you'll be invited to download it here.</div>
+    </div>
+
+    <div class="section">
+      <div style="font-weight:700;margin-bottom:6px">Controls & Mapping</div>
+      <div class="mapping" id="mapping">
+        <div class="row"><div>A</div><div class="kbd">Z / X / Gamepad A</div></div>
+        <div class="row"><div>B</div><div class="kbd">X / C / Gamepad B</div></div>
+        <div class="row"><div>Select</div><div class="kbd">V / Gamepad Select</div></div>
+        <div class="row"><div>Start</div><div class="kbd">Enter / Gamepad Start</div></div>
+        <div class="row"><div>Up/Down/Left/Right</div><div class="kbd">Arrow keys / D-pad</div></div>
+        <div class="row"><div>Quick Save</div><div class="kbd">F5</div></div>
+        <div class="row"><div>Quick Load</div><div class="kbd">F8</div></div>
+        <div class="row"><div>Screen Shot</div><div class="kbd">Ctrl+S</div></div>
+      </div>
+    </div>
+
+    <div class="section">
+      <div style="font-weight:700;margin-bottom:6px">Touch Controls</div>
+      <div class="touchpad">
+        <div class="muted small">For phones, an on-screen gamepad will appear automatically. You can also toggle it with the emulator UI.</div>
+      </div>
+    </div>
+
+    <div class="section">
+      <div style="font-weight:700">Advanced</div>
+      <div style="display:flex;gap:8px;margin-top:8px">
+        <button id="dumpSaves" class="btn ghost">List cached saves</button>
+        <button id="clearCache" class="btn ghost">Clear cached files</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- RIGHT: Game viewport -->
   <div>
-    <button id="load-rom">Load GBA ROM</button>
-    <button id="download-save">Download Save</button>
-    <button id="upload-save">Upload Save</button>
-    <button id="save-state">Save State</button>
-    <button id="load-state">Load State</button>
+    <div class="card">
+      <div style="position:relative;">
+        <div id="gameWrap">
+          <div class="unhinge">🍁 Maple Edition</div>
+          <div id="game"></div>
+          <!-- EmulatorJS will mount into #game -->
+        </div>
+      </div>
+
+      <div class="meta">
+        <div class="info">
+          <div><strong id="gameTitle">—</strong></div>
+          <div class="muted" id="gameMeta">Core: gba • CDN: stable</div>
+        </div>
+        <div style="display:flex;gap:10px;align-items:center">
+          <div style="font-size:13px;color:var(--muted)">FPS: <span id="fps">—</span></div>
+          <div style="font-size:13px;color:var(--muted)">Status: <span id="runState">idle</span></div>
+        </div>
+      </div>
+
+      <div style="margin-top:12px" class="card">
+        <div style="font-weight:700;margin-bottom:8px">Save / State Activity</div>
+        <div class="save-list" id="activityLog">No save activity yet.</div>
+      </div>
+
+    </div>
+
+    <footer>
+      Mapled by Maple • EmulatorJS CDN + mGBA core. Read the docs for advanced embed options and servers. (This page streams emulator binaries from the official CDN.) 
+    </footer>
   </div>
-  
-  <div id="emulator-container">
-    <div id="game"></div>
-  </div>
-  
-  <script type="text/javascript">
-    EJS_player = '#game';
-    EJS_core = 'mgba';
-    EJS_biosUrl = 'gba-bios.bin';
-    EJS_pathtodata = 'data/';
-    EJS_autoSave = true; // Enable autosave for SRAM
-    let currentGameId = null;
+</div>
 
-    // --- Base64 helpers ---
-    function b64Encode(bytes) {
-      let binary = "";
-      for (let i = 0; i < bytes.length; i++) {
-        binary += String.fromCharCode(bytes[i]);
-      }
-      return btoa(binary);
-    }
-    function b64Decode(b64) {
-      const binary = atob(b64);
-      const bytes = new Uint8Array(binary.length);
-      for (let i = 0; i < binary.length; i++) {
-        bytes[i] = binary.charCodeAt(i);
-      }
-      return bytes;
-    }
+<script>
+/*
+  ProGBA — EmulatorJS wrapper
+  Uses EmulatorJS CDN (stable) at https://cdn.emulatorjs.org/stable/data/loader.js
+  Works by: when user selects a ROM file, create an object URL, set EJS variables, load loader.js.
+  If a game is already running, we attempt to call EJS_terminate (if exposed) before loading a new instance.
+  Save hooks: EJS_onSaveUpdate (battery save buffer), EJS_onSaveState (save-state generation)
+  This page tries to be robust and friendly.
+*/
 
-    // Load ROM
-    document.getElementById('load-rom').addEventListener('click', function () {
-      const input = document.createElement('input');
-      input.type = 'file';
-      input.accept = '.gba,.zip';
-      input.onchange = function (e) {
-        const file = e.target.files[0];
-        if (file) {
-          const url = URL.createObjectURL(file);
-          currentGameId = file.name.replace(/\.[^/.]+$/, "");
-          EJS_gameUrl = url;
-          EJS_gameID = currentGameId;
+const CDN_BASE = 'https://cdn.emulatorjs.org/stable/data/';
+const LOADER_URL = CDN_BASE + 'loader.js';
 
-          // SRAM hooks
-          EJS_onSaveSRAM = function (saveBytes) {
-            localStorage.setItem("EJS_" + currentGameId + "_sram", b64Encode(saveBytes));
-          };
-          EJS_onLoadSRAM = function () {
-            const data = localStorage.getItem("EJS_" + currentGameId + "_sram");
-            return data ? b64Decode(data) : null;
-          };
+const dropzone = document.getElementById('dropzone');
+const romPicker = document.getElementById('romPicker');
+const statusEl = document.getElementById('status');
+const gameTitle = document.getElementById('gameTitle');
+const gameMeta = document.getElementById('gameMeta');
+const activityLog = document.getElementById('activityLog');
+const exportSaveBtn = document.getElementById('exportSaveBtn');
+const importSave = document.getElementById('importSave');
+const slotsContainer = document.getElementById('slots');
+const fpsEl = document.getElementById('fps');
+const runStateEl = document.getElementById('runState');
+const restartBtn = document.getElementById('restartBtn');
+const pauseBtn = document.getElementById('pauseBtn');
+const dumpSaves = document.getElementById('dumpSaves');
+const clearCache = document.getElementById('clearCache');
+const savePreview = document.getElementById('savePreview');
+let latestBatterySave = null;
+let saveStateSlots = new Array(10).fill(null);
 
-          document.querySelector('#game').innerHTML = '';
-          if (typeof EJS_start !== 'undefined') {
-            EJS_start();
-          } else {
-            const script = document.createElement('script');
-            script.src = 'data/loader.js';
-            script.onload = function () {
-              EJS_start();
-            };
-            document.head.appendChild(script);
+/* UI helpers */
+function logActivity(msg){
+  const time = new Date().toLocaleTimeString();
+  const el = document.createElement('div');
+  el.style.padding = '6px 4px';
+  el.style.borderBottom = '1px dashed rgba(255,255,255,0.02)';
+  el.textContent = `[${time}] ${msg}`;
+  if(activityLog.firstChild && activityLog.firstChild.textContent === 'No save activity yet.') activityLog.textContent = '';
+  activityLog.prepend(el);
+}
+
+function setStatus(s){
+  statusEl.textContent = s;
+}
+
+/* populate slots UI */
+function renderSlots(){
+  slotsContainer.innerHTML = '';
+  for(let i=0;i<10;i++){
+    const s = document.createElement('div');
+    s.className='slot';
+    s.innerHTML = `<div class="title">Slot ${i}</div>
+      <div style="margin-top:8px">
+        <button data-slot="${i}" class="btn ghost btn-save">Download</button>
+        <button data-slot="${i}" class="btn ghost btn-load">Upload</button>
+      </div>`;
+    slotsContainer.appendChild(s);
+  }
+}
+renderSlots();
+
+/* slot click handlers (download/upload) */
+slotsContainer.addEventListener('click', e=>{
+  const saveBtn = e.target.closest('.btn-save');
+  const loadBtn = e.target.closest('.btn-load');
+  if(saveBtn){
+    const slot = Number(saveBtn.dataset.slot);
+    if(!saveStateSlots[slot]) { alert('No save state in that slot yet. Use emulator UI to create a save state.'); return; }
+    const blob = new Blob([saveStateSlots[slot].data], {type:'application/octet-stream'});
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = (saveStateSlots[slot].name || `save-state-slot-${slot}.state`);
+    a.click();
+    URL.revokeObjectURL(a.href);
+    logActivity(`Downloaded save-state from slot ${slot}`);
+  }
+  if(loadBtn){
+    const slot = Number(loadBtn.dataset.slot);
+    const inp = document.createElement('input');
+    inp.type = 'file';
+    inp.accept = '.state';
+    inp.onchange = ()=> {
+      const f = inp.files[0];
+      const reader = new FileReader();
+      reader.onload = ()=> {
+        const buf = new Uint8Array(reader.result);
+        // we tell emulator to load the state by triggering a drop into the emulator -- EmulatorJS supports loading state files dropped onto the running emulator.
+        // We'll attempt to use EJS_module/loader if exposed; otherwise instruct user.
+        if(window.EJS_module && window.EJS_module.loadStateFromBuffer){
+          try {
+            window.EJS_module.loadStateFromBuffer(buf);
+            logActivity(`Loaded save-state into emulator from file ${f.name}`);
+          } catch(err){
+            console.warn(err);
+            alert('Could not ask emulator to load the state programmatically. Try dragging the .state file to the game area.');
           }
+        } else {
+          alert('Programmatic state-load not available in this build. Drag the .state file directly onto the game viewport to load it.');
         }
       };
-      input.click();
-    });
+      reader.readAsArrayBuffer(f);
+    };
+    inp.click();
+  }
+});
 
-    // Download Save
-    document.getElementById('download-save').addEventListener('click', function () {
-      if (!currentGameId) return alert("No game loaded!");
-      const key = "EJS_" + currentGameId + "_sram";
-      const saveData = localStorage.getItem(key);
-      if (saveData) {
-        const bytes = b64Decode(saveData);
-        const blob = new Blob([bytes], { type: 'application/octet-stream' });
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = currentGameId + ".sav";
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
+/* export battery save */
+exportSaveBtn.addEventListener('click', ()=>{
+  if(!latestBatterySave){ alert('No battery save captured yet. Play the game (save in-game) and the page will detect it.'); return; }
+  const blob = new Blob([latestBatterySave.save], {type:'application/octet-stream'});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  // name from metadata if available
+  const suggested = latestBatterySave.name || 'game_save.sav';
+  a.download = suggested;
+  a.click();
+  URL.revokeObjectURL(a.href);
+  logActivity('Exported battery save (.sav)');
+});
+
+/* import battery save */
+importSave.addEventListener('change', e=>{
+  const f = e.target.files[0];
+  if(!f) return;
+  const reader = new FileReader();
+  reader.onload = ()=> {
+    const buf = new Uint8Array(reader.result);
+    // try feeding to emulator via EJS_module.saveFiles or similar if available.
+    if(window.EJS_module && window.EJS_module.writeSaveFiles){
+      try{
+        window.EJS_module.writeSaveFiles([{name: f.name, data: buf}]).then(()=>{
+          alert('Imported save into emulator memory. Restart the game if needed.');
+          logActivity(`Imported battery save ${f.name}`);
+        }).catch(err=> {
+          console.warn(err);
+          alert('Import failed via API. Try dropping the .sav onto the game area instead.');
+        });
+      } catch(err){
+        console.warn(err);
+        alert('Import failed — emulator API unavailable. Drag the .sav file into the game area to import instead.');
+      }
+    } else {
+      alert('Programmatic import not available. Drop the .sav file onto the game area to import.');
+    }
+  };
+  reader.readAsArrayBuffer(f);
+});
+
+/* Drag & drop + chooser */
+dropzone.addEventListener('click', ()=> romPicker.click());
+romPicker.addEventListener('change', ()=> handleFiles(romPicker.files));
+['dragenter','dragover'].forEach(ev=> dropzone.addEventListener(ev, e=> { e.preventDefault(); dropzone.style.borderColor = 'rgba(255,255,255,0.12)'; }));
+['dragleave','drop'].forEach(ev=> dropzone.addEventListener(ev, e=> { e.preventDefault(); dropzone.style.borderColor = 'rgba(255,255,255,0.04)'; }));
+dropzone.addEventListener('drop', e=>{
+  const files = e.dataTransfer.files;
+  handleFiles(files);
+});
+
+function handleFiles(files){
+  if(!files || files.length === 0) return;
+  const file = files[0];
+  // accept .zip or .gba; if zip, we just pass to emulator which may handle it
+  const ext = file.name.split('.').pop().toLowerCase();
+  if(!['gba','zip','.gba','gm','bin'].includes(ext) && !file.name.toLowerCase().includes('.gba')) {
+    if(!confirm('File does not look like a .gba ROM. Continue anyway?')) return;
+  }
+  loadRomFile(file);
+}
+
+/* dynamically load EmulatorJS with EJS variables */
+function loadRomFile(file){
+  setStatus('Preparing ROM…');
+
+  // Clear any previous loader instances (if API exposed)
+  if(window.EJS_terminate) {
+    try {
+      window.EJS_terminate();
+      console.log('Called EJS_terminate to stop previous instance.');
+    } catch(e){
+      console.warn('EJS_terminate call failed', e);
+    }
+  }
+
+  // revoke old blob urls we used
+  if(window._progba_lastRomURL){ try{ URL.revokeObjectURL(window._progba_lastRomURL);}catch(e){} }
+  const romUrl = URL.createObjectURL(file);
+  window._progba_lastRomURL = romUrl;
+
+  // set global EJS vars as required by loader
+  window.EJS_player = '#game';
+  window.EJS_core = 'gba'; // use mGBA core
+  window.EJS_gameUrl = romUrl;
+  // path to data folder on emulatorjs CDN
+  window.EJS_pathtodata = CDN_BASE;
+  // start immediately after load
+  window.EJS_startOnLoaded = true;
+  // optional nice theming
+  window.EJS_color = '#ff6b6b';
+
+  // hooks
+  window.EJS_ready = function(){
+    setStatus('Emulator ready — playing');
+    gameTitle.textContent = file.name;
+    gameMeta.textContent = `Core: gba • file: ${file.name}`;
+    runStateEl.textContent = 'running';
+    logActivity(`Game started: ${file.name}`);
+  };
+
+  window.EJS_onGameStart = function(){
+    runStateEl.textContent = 'running';
+  };
+
+  // battery save hook: save updates (e.g., Pokemon game battery save writes)
+  window.EJS_onSaveUpdate = function(payload){
+    // payload: {hash, save, screenshot, format}
+    latestBatterySave = {
+      hash: payload.hash,
+      save: payload.save,
+      screenshot: payload.screenshot,
+      format: payload.format,
+      name: (file.name.replace(/\.[^/.]+$/, "") + '.sav')
+    };
+    savePreview.innerHTML = `<div style="display:flex;gap:8px;align-items:center"><div style="width:48px;height:48px;background:url(${payload.screenshot}) center/cover;border-radius:6px"></div><div><div style="font-weight:700">${latestBatterySave.name}</div><div class="muted small">Hash: ${payload.hash}</div></div></div>`;
+    logActivity('Detected battery save update — export available.');
+  };
+
+  // when emulator creates a save-state (UI triggered), EJS_onSaveState will receive [screenshot, saveStateBuffer]
+  window.EJS_onSaveState = function(arr){
+    try {
+      const screenshot = arr[0]; // data URL
+      const saveBuf = arr[1]; // Uint8Array or ArrayBuffer
+      // store into first free slot
+      const slotIndex = saveStateSlots.findIndex(s=>!s);
+      const idx = slotIndex === -1 ? 0 : slotIndex;
+      saveStateSlots[idx] = {data: (saveBuf instanceof Uint8Array ? saveBuf : new Uint8Array(saveBuf)), name: (gameTitle.textContent ? `${gameTitle.textContent.replace(/\.[^/.]+$/,'')}_slot${idx}.state` : `save_slot_${idx}.state`), when: Date.now()};
+      logActivity(`Save-state created (slot ${idx})`);
+      // show a small preview in activity
+      const node = document.createElement('div');
+      node.style.display='flex';
+      node.style.gap='8px';
+      node.style.alignItems='center';
+      node.innerHTML = `<div style="width:58px;height:40px;background-image:url(${screenshot});background-size:cover;border-radius:6px"></div><div style="font-size:13px"><strong>Saved slot ${idx}</strong><div class="muted small">${new Date().toLocaleTimeString()}</div></div>`;
+      activityLog.prepend(node);
+    } catch(e){
+      console.warn('EJS_onSaveState handler error', e);
+    }
+  };
+
+  // when emulator loads a save-state via UI (not programmatic) it can call this hook
+  window.EJS_onLoadState = function(){
+    logActivity('A save-state was loaded by the emulator UI');
+  };
+
+  // load loader.js dynamically (cache buster so reloading new games works)
+  const s = document.createElement('script');
+  s.src = LOADER_URL + '?_=' + Date.now();
+  s.onload = ()=> {
+    setStatus('ROM loaded; emulator initializing…');
+  };
+  s.onerror = (e)=> {
+    setStatus('Failed to load emulator core. Check console.');
+    alert('Failed to load EmulatorJS loader script from CDN. Make sure you are online and serving this page via HTTP(S).');
+    console.error('loader.js error', e);
+  };
+  document.body.appendChild(s);
+}
+
+/* small utilities */
+restartBtn.addEventListener('click', ()=>{
+  if(window.EJS_terminate){ try { window.EJS_terminate(); setStatus('Restarting — reloading ROM…'); setTimeout(()=> {
+      if(window._progba_lastRomURL){
+        const fName = gameTitle.textContent || 'reloaded.gba';
+        // re-trigger load by creating new script element
+        const s = document.createElement('script');
+        s.src = LOADER_URL + '?_reboot=' + Date.now();
+        s.onload = ()=> setStatus('Restarted');
+        document.body.appendChild(s);
+        logActivity('Restart requested');
+      } else setStatus('No ROM to restart');
+    }, 200);
+  } catch(e){ console.warn(e); alert('Restart failed.'); }
+  } else {
+    alert('Restart not available on this build.');
+  }
+});
+pauseBtn.addEventListener('click', ()=>{
+  if(window.EJS_module && window.EJS_module.pause){
+    try{ window.EJS_module.pause(); runStateEl.textContent = 'paused'; setStatus('Paused'); }catch(e){ alert('Pause API failed.'); }
+  } else {
+    alert('Pause API unavailable. Use emulator UI.');
+  }
+});
+
+dumpSaves.addEventListener('click', async ()=>{
+  let names = [];
+  try {
+    if(window.EJS_module && window.EJS_module.readSaveFiles){
+      const files = await window.EJS_module.readSaveFiles();
+      names = files.map(f=>f.name + ' (' + (f.data ? f.data.byteLength : '0') + ' bytes)');
+    } else {
+      names = ['Emulator API not exposed — cannot list saves programmatically.'];
+    }
+  } catch(e){
+    names = ['Error reading saves: ' + e.message];
+  }
+  alert('Save files:\n' + names.join('\n'));
+});
+
+clearCache.addEventListener('click', ()=>{
+  if(confirm('Clear emulator cache & local saves for this instance? This will remove cached game files and saves stored by EmulatorJS for this origin.')) {
+    try {
+      if(window.EJS_module && window.EJS_module.clearCache){
+        window.EJS_module.clearCache().then(()=> alert('Cleared emulator cache. Reload the page.'), ()=> alert('Failed to clear cache via API. Try clearing site data in browser.'));
       } else {
-        alert("No save found for this game!");
+        alert('API not available. Clear site data in browser storage manually.');
       }
-    });
+    } catch(e){
+      alert('Clear cache action failed: ' + e.message);
+    }
+  }
+});
 
-    // Upload Save
-    document.getElementById('upload-save').addEventListener('click', function () {
-      if (!currentGameId) return alert("Load a game before uploading a save!");
-      const input = document.createElement('input');
-      input.type = 'file';
-      input.accept = '.sav';
-      input.onchange = function (e) {
-        const file = e.target.files[0];
-        if (file) {
-          const reader = new FileReader();
-          reader.onload = function (event) {
-            const bytes = new Uint8Array(event.target.result);
-            localStorage.setItem("EJS_" + currentGameId + "_sram", b64Encode(bytes));
-            alert("Save uploaded! Reload the ROM to apply it.");
-          };
-          reader.readAsArrayBuffer(file);
-        }
-      };
-      input.click();
-    });
+/* FPS ticker if available */
+setInterval(()=>{
+  if(window.EJS_module && window.EJS_module.getFPS){
+    try{
+      fpsEl.textContent = Math.round(window.EJS_module.getFPS());
+    }catch(e){}
+  }
+},1000);
 
-    // Save State
-    document.getElementById('save-state').addEventListener('click', async function () {
-      if (!currentGameId || typeof EJS_emulator === 'undefined') return alert("No game running!");
-      const state = await EJS_emulator.saveState();
-      localStorage.setItem("EJS_" + currentGameId + "_state", b64Encode(state));
-      alert("State saved!");
-    });
+/* keyboard quick save/load convenience (F5 / F8). We try to trigger emulator's quick save/load via dispatching keyboard events (works in many builds). */
+window.addEventListener('keydown', e=>{
+  if(e.key === 'F5'){ e.preventDefault(); // quick save
+    // attempt to call any exposed helper
+    if(window.EJS_module && window.EJS_module.quickSave){ try { window.EJS_module.quickSave(); logActivity('Triggered quick save (API)'); return; } catch(e){} }
+    // fallback: dispatch key sequence
+    const evt = new KeyboardEvent('keydown', {key: 'F5', bubbles:true,cancelable:true});
+    document.dispatchEvent(evt);
+    logActivity('Triggered quick save (dispatch)');
+  }
+  if(e.key === 'F8'){ e.preventDefault();
+    if(window.EJS_module && window.EJS_module.quickLoad){ try { window.EJS_module.quickLoad(); logActivity('Triggered quick load (API)'); return; } catch(e){} }
+    const evt = new KeyboardEvent('keydown', {key: 'F8', bubbles:true,cancelable:true});
+    document.dispatchEvent(evt);
+    logActivity('Triggered quick load (dispatch)');
+  }
+});
 
-    // Load State
-    document.getElementById('load-state').addEventListener('click', async function () {
-      if (!currentGameId || typeof EJS_emulator === 'undefined') return alert("No game running!");
-      const data = localStorage.getItem("EJS_" + currentGameId + "_state");
-      if (data) {
-        await EJS_emulator.loadState(b64Decode(data));
-        alert("State loaded!");
-      } else {
-        alert("No state found!");
-      }
-    });
+/* friendly hint */
+logActivity('Ready. Drop a Pokémon GBA ROM (or any .gba) to start.');
+setStatus('Awaiting ROM…');
 
-    // Force save on unload (backup safety)
-    window.addEventListener('beforeunload', () => {
-      if (typeof EJS_emulator !== 'undefined' && currentGameId) {
-        try {
-          const sram = EJS_emulator.SRAM;
-          if (sram) {
-            localStorage.setItem("EJS_" + currentGameId + "_sram", b64Encode(sram));
-          }
-        } catch (e) {
-          console.warn("Could not save SRAM on unload", e);
-        }
-      }
-    });
-  </script>
+</script>
 
-  <script src="data/loader.js"></script>
 </body>
 </html>
