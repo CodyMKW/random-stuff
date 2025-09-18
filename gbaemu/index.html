@@ -7,53 +7,59 @@
   <style>
     body {
       font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      background: linear-gradient(135deg, #1a1a1a, #2b2b2b);
-      color: #f0f0f0;
+      background: #121212;
+      color: #f5f5f5;
       margin: 0;
       padding: 0;
       text-align: center;
     }
     header {
       padding: 20px;
-      background: #111;
       font-size: 2rem;
       font-weight: bold;
       color: #ff5555;
+      background: #1a1a1a;
       letter-spacing: 2px;
       text-shadow: 0 0 10px #ff5555;
     }
     #game {
-      margin: 20px auto;
+      margin: 25px auto;
       width: 640px;
       height: 480px;
       background: #000;
       border: 3px solid #ff5555;
       border-radius: 12px;
       box-shadow: 0 0 30px rgba(255,85,85,0.5);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #777;
+      font-size: 1.1rem;
     }
-    .controls, .savestates {
-      margin-top: 25px;
+    .panel {
+      margin-top: 20px;
       padding: 20px;
       background: #1f1f1f;
-      border-radius: 10px;
+      border-radius: 12px;
       display: inline-block;
       box-shadow: 0 0 20px rgba(0,0,0,0.5);
+      text-align: center;
     }
-    .controls h2, .savestates h2 {
+    .panel h2 {
       margin-bottom: 15px;
       color: #ff7777;
     }
-    .controls table {
+    table {
       margin: auto;
       border-collapse: collapse;
     }
-    .controls td {
+    td {
       padding: 8px 16px;
       border: 1px solid #444;
       background: #2c2c2c;
       border-radius: 6px;
     }
-    .savestates button {
+    button {
       margin: 6px;
       padding: 10px 18px;
       font-size: 1rem;
@@ -65,17 +71,28 @@
       box-shadow: 0 0 10px rgba(255,85,85,0.5);
       transition: background 0.2s;
     }
-    .savestates button:hover {
+    button:hover {
       background: #ff7777;
+    }
+    #dropzone {
+      margin-top: 10px;
+      padding: 10px;
+      border: 2px dashed #ff5555;
+      border-radius: 10px;
+      color: #aaa;
+      width: 400px;
+      margin-left: auto;
+      margin-right: auto;
+      font-size: 0.9rem;
     }
   </style>
 </head>
 <body>
   <header>🎮 CodAdvance 🎮</header>
   
-  <div id="game"></div>
+  <div id="game">Drop a GBA ROM here or use "Load ROM"</div>
 
-  <div class="controls">
+  <div class="panel">
     <h2>Controls</h2>
     <table>
       <tr><td>A</td><td>Z</td></tr>
@@ -88,7 +105,7 @@
     </table>
   </div>
 
-  <div class="savestates">
+  <div class="panel">
     <h2>Save States</h2>
     <div>
       <button onclick="saveState(1)">Save Slot 1</button>
@@ -106,22 +123,54 @@
       <button onclick="exportSave()">Export Save</button>
       <button onclick="importSave()">Import Save</button>
     </div>
+    <div style="margin-top:15px;">
+      <button onclick="document.getElementById('romInput').click()">Load ROM</button>
+      <input type="file" id="romInput" accept=".gba" style="display:none" />
+      <div id="dropzone">Or drag and drop a ROM file here</div>
+    </div>
   </div>
 
   <script>
-    // EmulatorJS setup
+    // EmulatorJS config
     EJS_emulator = '#game';
     EJS_core = 'gba';
-    EJS_gameUrl = 'roms/pokemon-ruby.gba'; // update path to your ROM
-    EJS_biosUrl = 'bios/gba_bios.bin';     // update path to your BIOS
+    EJS_biosUrl = 'bios/gba_bios.bin'; 
     EJS_pathtodata = 'data/';
-    EJS_options = {
-      saveType: 3 // Force FLASH 128K for Pokémon
-    };
+    EJS_options = { saveType: 3 }; // Force FLASH 128K for Pokémon
   </script>
   <script src="data/loader.js"></script>
 
   <script>
+    // Handle ROM loading
+    const romInput = document.getElementById("romInput");
+    const dropzone = document.getElementById("dropzone");
+
+    romInput.addEventListener("change", async e => {
+      const file = e.target.files[0];
+      if (file) loadRomFile(file);
+    });
+
+    dropzone.addEventListener("dragover", e => {
+      e.preventDefault();
+      dropzone.style.borderColor = "#ff7777";
+    });
+    dropzone.addEventListener("dragleave", e => {
+      e.preventDefault();
+      dropzone.style.borderColor = "#ff5555";
+    });
+    dropzone.addEventListener("drop", e => {
+      e.preventDefault();
+      dropzone.style.borderColor = "#ff5555";
+      const file = e.dataTransfer.files[0];
+      if (file) loadRomFile(file);
+    });
+
+    async function loadRomFile(file) {
+      const data = await file.arrayBuffer();
+      EJS_gameData = new Uint8Array(data);
+      window.EJS_loadRom && EJS_loadRom();
+    }
+
     // Save State Functions
     async function saveState(slot) {
       const state = await EJS_emulatorInstance.saveState();
