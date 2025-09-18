@@ -140,6 +140,52 @@
       <div style="font-weight:700;margin-bottom:6px">Touch Controls</div>
       <div class="touchpad">
         <div class="muted small">For phones, an on-screen gamepad will appear automatically. You can also toggle it with the emulator UI.</div>
+      </div>
+    </div>
+
+    <div class="section">
+      <div style="font-weight:700">Advanced</div>
+      <div style="display:flex;gap:8px;margin-top:8px">
+        <button id="dumpSaves" class="btn ghost">List cached saves</button>
+        <button id="clearCache" class="btn ghost">Clear cached files</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- RIGHT: Game viewport -->
+  <div>
+    <div class="card">
+      <div style="position:relative;">
+        <div id="gameWrap">
+          <div class="unhinge">🍁 Maple Edition</div>
+          <div id="game"></div>
+          <!-- EmulatorJS will mount into #game -->
+        </div>
+      </div>
+
+      <div class="meta">
+        <div class="info">
+          <div><strong id="gameTitle">—</strong></div>
+          <div class="muted" id="gameMeta">Core: gba • CDN: stable</div>
+        </div>
+        <div style="display:flex;gap:10px;align-items:center">
+          <div style="font-size:13px;color:var(--muted)">FPS: <span id="fps">—</span></div>
+          <div style="font-size:13px;color:var(--muted)">Status: <span id="runState">idle</span></div>
+        </div>
+      </div>
+
+      <div style="margin-top:12px" class="card">
+        <div style="font-weight:700;margin-bottom:8px">Save / State Activity</div>
+        <div class="save-list" id="activityLog">No save activity yet.</div>
+      </div>
+
+    </div>
+
+    <footer>
+      Mapled by Maple • EmulatorJS CDN + mGBA core. Read the docs for advanced embed options and servers. (This page streams emulator binaries from the official CDN.) 
+    </footer>
+  </div>
+</div>
 
 <script>
 const CDN_BASE = 'https://cdn.emulatorjs.org/stable/data/';
