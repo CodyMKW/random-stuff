@@ -182,222 +182,171 @@
     </footer>
   </div>
 
-  <script>
-    // ---------- CONFIG ----------
-    // Use the EmulatorJS CDN (stable). This removes the need to self-host emulator files.
-    const EMULATORJS_DATA_CDN = 'https://cdn.emulatorjs.org/stable/data/';
-    const EMULATORJS_LOADER = EMULATORJS_DATA_CDN + 'loader.js';
+<script>
+  const EMULATORJS_DATA_CDN = 'https://cdn.emulatorjs.org/stable/data/';
+  const EMULATORJS_LOADER = EMULATORJS_DATA_CDN + 'loader.js';
 
-    // UI refs
-    const fileIn = document.getElementById('fileIn');
-    const pickBtn = document.getElementById('pickBtn');
-    const dropzone = document.getElementById('dropzone');
-    const selectedName = document.getElementById('selectedName');
-    const loadBtn = document.getElementById('loadBtn');
-    const gameTitle = document.getElementById('gameTitle');
-    const statusSpan = document.getElementById('status');
-    const volumeRange = document.getElementById('volume');
-    const speedSelect = document.getElementById('speed');
-    const screenshotBtn = document.getElementById('screenshotBtn');
-    const fullscreenBtn = document.getElementById('fullscreenBtn');
-    const openUiBtn = document.getElementById('openUiBtn');
-    const openSettingsBtn = document.getElementById('openSettings');
+  const fileIn = document.getElementById('fileIn');
+  const pickBtn = document.getElementById('pickBtn');
+  const dropzone = document.getElementById('dropzone');
+  const selectedName = document.getElementById('selectedName');
+  const loadBtn = document.getElementById('loadBtn');
+  const gameTitle = document.getElementById('gameTitle');
+  const statusSpan = document.getElementById('status');
+  const volumeRange = document.getElementById('volume');
+  const speedSelect = document.getElementById('speed');
+  const screenshotBtn = document.getElementById('screenshotBtn');
+  const fullscreenBtn = document.getElementById('fullscreenBtn');
+  const openUiBtn = document.getElementById('openUiBtn');
+  const openSettingsBtn = document.getElementById('openSettings');
 
-    let romFile = null;
-    let romBlobUrl = null;
-    let loaderScriptEl = null;
+  // New: .sav loader
+  const savInput = document.createElement('input');
+  savInput.type = 'file';
+  savInput.accept = '.sav';
+  savInput.style.display = 'none';
+  document.body.appendChild(savInput);
 
-    // Helpers
-    function setStatus(s){ statusSpan.textContent = s; }
+  let romFile = null;
+  let romBlobUrl = null;
+  let loaderScriptEl = null;
 
-    function clearPreviousLoader(){
-      // Attempt to remove previously loaded loader script and module objects
-      if (loaderScriptEl) {
-        loaderScriptEl.remove();
-        loaderScriptEl = null;
+  function setStatus(s){ statusSpan.textContent = s; }
+
+  function clearPreviousLoader(){
+    if (loaderScriptEl) { loaderScriptEl.remove(); loaderScriptEl = null; }
+    try { if (window.emulatorModule && window.emulatorModule.quit) window.emulatorModule.quit(); } catch(e){}
+    const game = document.getElementById('game');
+    game.innerHTML = '';
+    delete window.EJS_player;
+    delete window.EJS_core;
+    delete window.EJS_gameUrl;
+    delete window.EJS_pathtodata;
+    delete window.EJS_gameName;
+    delete window.EJS_volume;
+    delete window.EJS_startOnLoaded;
+    delete window.EJS_videoSpeed;
+    if (romBlobUrl) { try { URL.revokeObjectURL(romBlobUrl); } catch(e){} romBlobUrl = null; }
+  }
+
+  function injectLoaderOnce(){
+    return new Promise((resolve, reject) => {
+      loaderScriptEl = document.createElement('script');
+      loaderScriptEl.src = EMULATORJS_LOADER + '?_=' + Date.now();
+      loaderScriptEl.async = true;
+      loaderScriptEl.onload = () => {
+        setStatus('running');
+        resolve();
+      };
+      loaderScriptEl.onerror = () => {
+        setStatus('loader error');
+        reject(new Error('Failed to load emulator loader'));
+      };
+      document.body.appendChild(loaderScriptEl);
+      setStatus('loading core...');
+    });
+  }
+
+  async function startGame(){
+    if (!romFile) return alert('Pick a ROM first');
+    setStatus('preparing rom...');
+    clearPreviousLoader();
+    romBlobUrl = URL.createObjectURL(romFile);
+
+    window.EJS_player = '#game';
+    window.EJS_core = 'gba';
+    window.EJS_gameUrl = romBlobUrl;
+    window.EJS_pathtodata = EMULATORJS_DATA_CDN;
+    window.EJS_gameName = romFile.name.replace(/\.[^.]+$/, '');
+    window.EJS_volume = parseFloat(volumeRange.value);
+    window.EJS_startOnLoaded = true;
+    window.EJS_videoSpeed = parseFloat(speedSelect.value) || 1;
+
+    await injectLoaderOnce();
+
+    // Give emulator time to boot before patching
+    const wait = setInterval(() => {
+      if (window.EJS_emulator) {
+        clearInterval(wait);
+        setStatus('ready');
       }
-      // Try to cleanup global emulator variables exposed by EmulatorJS
-      try {
-        if (window.emulatorModule && window.emulatorModule.quit) {
-          // attempt a graceful shutdown if available
-          try { window.emulatorModule.quit(); } catch(e){}
-        }
-      } catch(e){}
-      // Remove injected iframe-like player if any content was added
-      const game = document.getElementById('game');
-      game.innerHTML = ''; // wipe
-      // Reset some globals the loader reads
-      delete window.EJS_player;
-      delete window.EJS_core;
-      delete window.EJS_gameUrl;
-      delete window.EJS_pathtodata;
-      delete window.EJS_gameName;
-      delete window.EJS_volume;
-      delete window.EJS_startOnLoaded;
-      // allow GC of blob url if present
-      if (romBlobUrl) {
-        try { URL.revokeObjectURL(romBlobUrl); } catch(e){}
-        romBlobUrl = null;
-      }
+    }, 500);
+  }
+
+  // File input events
+  pickBtn.addEventListener('click', ()=> fileIn.click());
+  dropzone.addEventListener('click', ()=> fileIn.click());
+  fileIn.addEventListener('change', (ev)=>{
+    const f = ev.target.files[0]; if (!f) return;
+    romFile = f; selectedName.textContent = f.name; gameTitle.textContent = f.name; setStatus('ready');
+  });
+  dropzone.addEventListener('drop', (ev)=>{
+    ev.preventDefault();
+    const f = ev.dataTransfer.files[0]; if (!f) return;
+    romFile = f; selectedName.textContent = f.name; gameTitle.textContent = f.name; setStatus('ready');
+  });
+  ['dragenter','dragover','dragleave'].forEach(e => dropzone.addEventListener(e, ev=>ev.preventDefault()));
+
+  loadBtn.addEventListener('click', startGame);
+
+  fullscreenBtn.addEventListener('click', async ()=>{
+    const el = document.getElementById('gameArea');
+    if (el.requestFullscreen) await el.requestFullscreen();
+  });
+
+  screenshotBtn.addEventListener('click', () => {
+    const canvas = document.querySelector('#game canvas');
+    if (!canvas) return alert('No game running');
+    const data = canvas.toDataURL('image/png');
+    const a = document.createElement('a');
+    a.href = data;
+    a.download = (window.EJS_gameName || 'screenshot') + '.png';
+    a.click();
+  });
+
+  openUiBtn.addEventListener('click', ()=>{
+    const btn = document.querySelector('#game .ejs-ui-toggle, #game [data-open-settings]');
+    if (btn) btn.click();
+  });
+  openSettingsBtn.addEventListener('click', ()=> openUiBtn.click());
+
+  // Volume + speed control (wait until emulator loaded)
+  volumeRange.addEventListener('input', ()=>{
+    if (window.EJS_emulator && window.EJS_emulator.volume) {
+      window.EJS_emulator.volume(parseFloat(volumeRange.value));
     }
-
-    function injectLoaderOnce(){
-      // add loader script (it will read global EJS_* variables)
-      return new Promise((resolve, reject) => {
-        loaderScriptEl = document.createElement('script');
-        loaderScriptEl.src = EMULATORJS_LOADER + '?_=' + Date.now();
-        loaderScriptEl.async = true;
-        loaderScriptEl.onload = () => {
-          setStatus('running');
-          resolve();
-        };
-        loaderScriptEl.onerror = (e) => {
-          setStatus('loader error');
-          reject(new Error('Failed to load emulator loader'));
-        };
-        document.body.appendChild(loaderScriptEl);
-        setStatus('loading core...');
-      });
+  });
+  speedSelect.addEventListener('change', ()=>{
+    if (window.EJS_emulator && window.EJS_emulator.setSpeed) {
+      window.EJS_emulator.setSpeed(parseFloat(speedSelect.value));
     }
+  });
 
-    // Load the ROM (file chosen)
-    async function startGame(){
-      if (!romFile) {
-        alert('Pick a ROM file first (a .gba or compatible archive).');
-        return;
-      }
-      setStatus('preparing rom...');
-      // clear previous instance if any
-      clearPreviousLoader();
+  // SAV loader
+  const savBtn = document.createElement('button');
+  savBtn.textContent = 'Load .sav';
+  savBtn.className = 'btn ghost';
+  document.querySelector('.control-grid').appendChild(savBtn);
 
-      // create blob url for ROM
-      romBlobUrl = URL.createObjectURL(romFile);
-
-      // Set EmulatorJS globals it expects before loader runs
-      window.EJS_player = '#game';
-      window.EJS_core = 'gba'; // use gba / mgba core
-      window.EJS_gameUrl = romBlobUrl;
-      window.EJS_pathtodata = EMULATORJS_DATA_CDN; // use CDN path for loader assets
-      window.EJS_gameName = romFile.name.replace(/\.[^.]+$/, '');
-      window.EJS_volume = parseFloat(volumeRange.value);
-      window.EJS_startOnLoaded = true; // auto start when loaded
-
-      // Speed control: many cores support multiplier via UI, but emulator may also accept EJS_videoSpeed
-      // We provide a soft flag (not all cores use it). If supported, loader will pick it up.
-      window.EJS_videoSpeed = parseFloat(speedSelect.value) || 1;
-
-      // inject loader script which will mount emulator into #game
-      try {
-        await injectLoaderOnce();
-      } catch (err) {
-        console.error(err);
-        alert('Could not start emulator. Check console for details.');
-      }
-    }
-
-    // ---------- UI wiring ----------
-    pickBtn.addEventListener('click', ()=> fileIn.click());
-    dropzone.addEventListener('click', ()=> fileIn.click());
-
-    fileIn.addEventListener('change', (ev)=>{
-      const f = ev.target.files && ev.target.files[0];
-      if (!f) return;
-      romFile = f;
-      selectedName.textContent = f.name;
-      gameTitle.textContent = f.name;
-      setStatus('ready to start');
-    });
-
-    // Drag & drop
-    ['dragenter','dragover'].forEach(e => dropzone.addEventListener(e, (ev)=> { ev.preventDefault(); dropzone.style.borderColor = 'rgba(255,255,255,0.12)'; }));
-    ['dragleave','drop'].forEach(e => dropzone.addEventListener(e, (ev)=> { ev.preventDefault(); dropzone.style.borderColor = ''; }));
-    dropzone.addEventListener('drop', (ev) => {
-      ev.preventDefault();
-      const f = ev.dataTransfer && ev.dataTransfer.files && ev.dataTransfer.files[0];
-      if (!f) return;
-      romFile = f;
-      selectedName.textContent = f.name;
-      gameTitle.textContent = f.name;
-      setStatus('ready to start');
-    });
-
-    loadBtn.addEventListener('click', startGame);
-
-    // Fullscreen
-    fullscreenBtn.addEventListener('click', async ()=>{
-      const el = document.getElementById('gameArea');
-      if (el.requestFullscreen) await el.requestFullscreen();
-      else if (el.webkitRequestFullscreen) await el.webkitRequestFullscreen();
-    });
-
-    // Screenshot: attempt to call the emulator screenshot function if exposed, otherwise fallback to canvas capture
-    screenshotBtn.addEventListener('click', async () => {
-      // EmulatorJS provides its own screenshot feature in UI, but we try to call programmatically:
-      try {
-        if (window.emulatorModule && window.emulatorModule.do_screenshot) {
-          // some builds expose a screenshot function
-          window.emulatorModule.do_screenshot();
-          alert('Screenshot requested via emulator (check UI/downloads).');
-          return;
-        }
-      } catch(e){}
-
-      // fallback: try to capture canvas inside #game
-      try {
-        const gameNode = document.querySelector('#game canvas');
-        if (!gameNode) throw new Error('No canvas found');
-        const data = gameNode.toDataURL('image/png');
-        const a = document.createElement('a'); a.href = data; a.download = (window.EJS_gameName || 'gba-screenshot') + '.png'; a.click();
-      } catch (err) {
-        alert('Could not capture screenshot automatically. Use built-in emulator UI screenshot.');
-      }
-    });
-
-    // Open emulator UI (if the loader created a UI toggle)
-    openUiBtn.addEventListener('click', ()=>{
-      // EmulatorJS creates a settings/menu button inside the player; we can try to simulate opening via class selectors.
-      // If not present, advise user to use the on-screen UI.
-      const openBtn = document.querySelector('#game .ejs-ui-toggle, #game [data-open-settings], .emulator-ui-toggle');
-      if (openBtn) openBtn.click();
-      else alert('Open the emulator UI using the in-frame menu (top-right of emulator area) after the emulator has loaded.');
-    });
-
-    // Open settings button tries to open virtual settings panel if exposed
-    openSettingsBtn.addEventListener('click', ()=> openUiBtn.click());
-
-    // Volume change updates global and attempts to inform running module
-    volumeRange.addEventListener('input', ()=>{
-      window.EJS_volume = parseFloat(volumeRange.value);
-      // If emulator exposes an API to set volume, try it:
-      try { if (window.emulatorModule && window.emulatorModule.setVolume) window.emulatorModule.setVolume(window.EJS_volume); } catch(e){}
-    });
-
-    // speed select
-    speedSelect.addEventListener('change', ()=>{
-      window.EJS_videoSpeed = parseFloat(speedSelect.value);
-      try { if (window.emulatorModule && window.emulatorModule.setSpeed) window.emulatorModule.setSpeed(window.EJS_videoSpeed); } catch(e){}
-    });
-
-    // Safety: warn on navigation
-    window.addEventListener('beforeunload', (e) => {
-      if (window.EJS_gameUrl) {
-        e.preventDefault();
-        e.returnValue = '';
-      }
-    });
-
-    // Expose a small helper for debugging in console
-    window.MaplesGBA = {
-      startGame, clearPreviousLoader,
-      setRomFileFromBlob: (blob, name='game.gba') => {
-        romFile = new File([blob], name, {type:'application/octet-stream'});
-        selectedName.textContent = romFile.name;
-        gameTitle.textContent = romFile.name;
+  savBtn.addEventListener('click', ()=> savInput.click());
+  savInput.addEventListener('change', (ev)=>{
+    const f = ev.target.files[0]; if (!f) return;
+    const reader = new FileReader();
+    reader.onload = function(){
+      if (window.EJS_emulator && window.EJS_emulator.loadSaveFile) {
+        const bytes = new Uint8Array(reader.result);
+        window.EJS_emulator.loadSaveFile(bytes);
+        alert('Save file loaded!');
+      } else {
+        alert('Emulator not ready for save file');
       }
     };
+    reader.readAsArrayBuffer(f);
+  });
 
-    // Helpful hint printed to console
-    console.info("Maple's GBAcade ready. Use the file picker or drag a .gba onto the drop area, then press Start Game.");
-  </script>
+  window.addEventListener('beforeunload', (e) => {
+    if (window.EJS_gameUrl) { e.preventDefault(); e.returnValue = ''; }
+  });
+</script>
 </body>
 </html>
