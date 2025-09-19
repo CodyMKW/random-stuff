@@ -1,443 +1,179 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>CodAdvance — GBA Emulator (Beta build)</title>
-<style>
-  :root{
-    --bg:#0b0f14; --panel:#0f1720; --accent:#ff6b6b; --muted:#9aa5b1;
-    --glass: rgba(255,255,255,0.04);
-  }
-  html,body{height:100%;margin:0;font-family:Inter,system-ui,Segoe UI,Roboto,"Helvetica Neue",Arial;}
-  body{
-    background:
-      radial-gradient(1200px 400px at 10% 10%, rgba(255,107,107,0.06), transparent 8%),
-      linear-gradient(180deg,#071018 0%, #071623 45%, #051018 100%);
-    color:#e6eef6;
-    -webkit-font-smoothing:antialiased;
-    padding:24px;
-    box-sizing:border-box;
-  }
-
-  header{display:flex;gap:16px;align-items:center;margin-bottom:18px}
-  .brand{display:flex;gap:12px;align-items:center}
-  .logo{width:52px;height:52px;background:linear-gradient(135deg,#ff9a9e,#fecfef);border-radius:14px;display:flex;align-items:center;justify-content:center;font-weight:700;color:#111}
-  h1{font-size:20px;margin:0}
-  p.lead{margin:0;color:var(--muted);font-size:13px}
-
-  .layout{display:grid;grid-template-columns: 420px 1fr; gap:20px; align-items:start;}
-  .card{background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01)); border-radius:12px;padding:14px;box-shadow: 0 6px 18px rgba(2,6,23,0.6); border:1px solid rgba(255,255,255,0.03)}
-
-  /* left panel */
-  .controls .section{margin-bottom:12px}
-  .dropzone{
-    border:2px dashed rgba(255,255,255,0.04);
-    padding:18px;border-radius:10px;text-align:center;cursor:pointer;background:var(--glass);
-  }
-  .muted{color:var(--muted);font-size:13px}
-  .btn{
-    display:inline-flex;align-items:center;gap:8px;padding:10px 12px;border-radius:8px;background:linear-gradient(90deg,var(--accent),#ffa77a);color:#07201a;font-weight:600;border:none;cursor:pointer;
-  }
-  .btn.ghost{background:transparent;border:1px solid rgba(255,255,255,0.04);color:var(--muted);font-weight:600}
-  .flex{display:flex;gap:8px;align-items:center}
-  .kbd{font-family:monospace;background:rgba(255,255,255,0.03);border-radius:6px;padding:6px 8px;font-size:12px;color:var(--muted)}
-  .small{font-size:13px}
-
-  /* right panel */
-  #gameWrap{width:100%;height:520px;background:#000;border-radius:10px;overflow:hidden;display:flex;align-items:center;justify-content:center;position:relative}
-  #game{width:100%;height:100%;}
-  .meta{display:flex;justify-content:space-between;margin-top:10px;gap:8px;align-items:center}
-  .info{color:var(--muted);font-size:13px}
-
-  /* save slots grid */
-  .slots{display:grid;grid-template-columns:repeat(5,1fr);gap:8px}
-  .slot{background:rgba(255,255,255,0.02);padding:8px;border-radius:8px;text-align:center;font-size:13px}
-  .slot .title{font-weight:700;color:#fff}
-  .save-list{max-height:160px;overflow:auto;padding:6px;border-radius:8px;border:1px dashed rgba(255,255,255,0.02)}
-  label.fileish{display:inline-block;padding:10px;border-radius:8px;background:rgba(255,255,255,0.02);cursor:pointer}
-
-  footer{margin-top:18px;color:var(--muted);font-size:13px}
-  .betabadge{ position:absolute; right:14px; top:12px; font-size:12px; color: #071018; background: #ffdede; padding:6px 8px; border-radius:20px; transform: rotate(-6deg); box-shadow: 0 6px 12px rgba(0,0,0,0.3)}
-  .right-col-top{display:flex;gap:10px;align-items:center}
-  .mapping{display:grid;grid-template-columns:repeat(2,1fr);gap:6px;margin-top:8px}
-  .mapping .row{display:flex;justify-content:space-between;padding:6px;background:rgba(255,255,255,0.01);border-radius:6px;font-size:13px}
-  .touchpad{display:none}
-  @media (max-width:1100px){
-    .layout{grid-template-columns:1fr; }
-    #gameWrap{height:420px}
-    .touchpad{display:block;margin-top:8px}
-  }
-</style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Grok's GBA Carnage Engine: Nintendo's Polite Annihilation of Console Peasants</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f0f0f0;
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+        }
+        h1 {
+            color: #e60012; /* Nintendo red */
+            text-align: center;
+        }
+        .controls-panel {
+            background: #fff;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 20px;
+            width: 100%;
+            max-width: 480px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .controls-panel label {
+            display: block;
+            margin-bottom: 10px;
+        }
+        .controls-panel button {
+            background: #e60012;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+        .controls-panel button:hover {
+            background: #c2000f;
+        }
+        .emulator-container {
+            width: 480px; /* Double GBA resolution for clarity */
+            height: 320px;
+            max-width: 100%;
+            background: #000;
+            border: 2px solid #e60012;
+            border-radius: 8px;
+            overflow: hidden;
+            position: relative;
+        }
+        #game {
+            width: 100%;
+            height: 100%;
+        }
+        .key-info {
+            margin-top: 20px;
+            text-align: center;
+            font-size: 14px;
+            color: #333;
+        }
+        .key-info ul {
+            list-style: none;
+            padding: 0;
+        }
+        .key-info li {
+            margin: 5px 0;
+        }
+        @media (max-width: 600px) {
+            .emulator-container {
+                width: 100%;
+                height: auto;
+            }
+        }
+    </style>
 </head>
 <body>
-<header>
-  <div class="brand">
-    <div class="logo">CBA</div>
-    <div>
-      <h1>CodAdvance — GBA Emulator (Beta build)</h1>
-      <p class="lead">GBA in the browser • Drag ROMs in • Battery saves & Save-States • Professional controls</p>
-    </div>
-  </div>
-  <div style="margin-left:auto;text-align:right">
-    <div class="muted">Powered by <strong>EmulatorJS</strong></div>
-    <div style="font-size:12px;color:var(--muted)">CDN: stable • Core: mGBA</div>
-  </div>
-</header>
-
-<div class="layout">
-  <!-- LEFT: Controls -->
-  <div class="card controls">
-    <div class="section">
-      <div class="dropzone" id="dropzone" tabindex="0">
-        <div style="font-size:14px;font-weight:700">Drop a .gba ROM here</div>
-        <div class="muted" style="margin-top:8px">Or click to choose — supports drag & drop, and will keep your saves local.</div>
-        <input id="romPicker" accept=".gba,.zip" type="file" style="display:none">
-      </div>
-    </div>
-
-    <div class="section">
-      <div style="display:flex;gap:8px;align-items:center;justify-content:space-between">
-        <div>
-          <div style="font-weight:700">Game Status</div>
-          <div class="muted small" id="status">No game loaded</div>
-        </div>
-        <div>
-          <button class="btn ghost" id="restartBtn">Restart</button>
-          <button class="btn ghost" id="pauseBtn">Pause</button>
-        </div>
-      </div>
-    </div>
-
-    <div class="section">
-      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
-        <div style="font-weight:700">Battery Save</div>
-        <div class="muted small">Pokémon-friendly</div>
-      </div>
-      <div style="display:flex;gap:8px;margin-bottom:8px">
-        <button class="btn" id="exportSaveBtn">Export Latest Save</button>
-        <label class="fileish">
-          Import Save <input id="importSave" type="file" accept=".sav" style="display:none" />
+    <h1>Grok's GBA Carnage Engine: Nintendo's Polite Annihilation of Console Peasants</h1>
+    
+    <div class="controls-panel">
+        <label>
+            Upload GBA ROM (.gba):
+            <input type="file" id="romFile" accept=".gba">
         </label>
-      </div>
-      <div class="muted small">If the emulator writes a battery save, this panel will show it and allow export.</div>
-      <div style="margin-top:8px" id="savePreview"></div>
+        <label>
+            Upload GBA BIOS (gba_bios.bin):
+            <input type="file" id="biosFile" accept=".bin">
+        </label>
+        <button id="startEmulator">Load and Start Emulator</button>
+    </div>
+    
+    <div class="emulator-container">
+        <div id="game"></div>
+    </div>
+    
+    <div class="key-info">
+        <h3>Controls</h3>
+        <ul>
+            <li>Arrow Keys: D-Pad</li>
+            <li>Z: A Button</li>
+            <li>X: B Button</li>
+            <li>A: L Button</li>
+            <li>S: R Button</li>
+            <li>Enter: Start</li>
+            <li>Shift: Select</li>
+            <li>F1: Open Menu (Save/Load States, Cheats, etc.)</li>
+            <li>Virtual gamepad appears on touch devices automatically.</li>
+        </ul>
+        <p>Pro tip: For best performance, use a fast browser and legal ROMs only—Nintendo deserves it.</p>
     </div>
 
-    <div class="section">
-      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
-        <div style="font-weight:700">Save States (download / restore)</div>
-        <div class="muted small">Quick download slots</div>
-      </div>
+    <script type="text/javascript">
+        // EmulatorJS Configuration
+        window.EJS_player = '#game';
+        window.EJS_core = 'mgba'; // Default GBA core
+        window.EJS_pathtodata = 'https://cdn.emulatorjs.org/releases/4.2.3/data/'; // Latest CDN as of knowledge
+        window.EJS_startOnLoaded = true;
+        window.EJS_volume = 1.0;
+        window.EJS_threads = true; // Enable for better perf if supported
+        window.EJS_fullscreenOnLoaded = false;
+        window.EJS_color = '#e60012'; // Nintendo red theme
+        window.EJS_backgroundColor = '#f0f0f0';
+        window.EJS_alignStartButton = 'center';
 
-      <div class="slots" id="slots">
-        <!-- slots injected -->
-      </div>
-      <div style="margin-top:8px" class="muted small">Use the built-in emulator controls to create a save state (or use emulator UI). When a save-state is created, you'll be invited to download it here.</div>
-    </div>
+        // Virtual gamepad settings for professional touch layout
+        window.EJS_VirtualGamepadSettings = {
+            opacity: 0.7,
+            touchControls: true // Enable on-screen controls
+        };
 
-    <div class="section">
-      <div style="font-weight:700;margin-bottom:6px">Controls & Mapping</div>
-      <div class="mapping" id="mapping">
-        <div class="row"><div>A</div><div class="kbd">Z / X / Gamepad A</div></div>
-        <div class="row"><div>B</div><div class="kbd">X / C / Gamepad B</div></div>
-        <div class="row"><div>Select</div><div class="kbd">V / Gamepad Select</div></div>
-        <div class="row"><div>Start</div><div class="kbd">Enter / Gamepad Start</div></div>
-        <div class="row"><div>Up/Down/Left/Right</div><div class="kbd">Arrow keys / D-pad</div></div>
-        <div class="row"><div>Quick Save</div><div class="kbd">F5</div></div>
-        <div class="row"><div>Quick Load</div><div class="kbd">F8</div></div>
-        <div class="row"><div>Screen Shot</div><div class="kbd">Ctrl+S</div></div>
-      </div>
-    </div>
+        // Default controls mapping (customized for GBA feel)
+        window.EJS_defaultControls = {
+            'keyboard': {
+                'up': 'ArrowUp',
+                'down': 'ArrowDown',
+                'left': 'ArrowLeft',
+                'right': 'ArrowRight',
+                'a': 'z',
+                'b': 'x',
+                'l': 'a',
+                'r': 's',
+                'start': 'Enter',
+                'select': 'Shift'
+            }
+        };
 
-    <div class="section">
-      <div style="font-weight:700;margin-bottom:6px">Touch Controls</div>
-      <div class="touchpad">
-        <div class="muted small">For phones, an on-screen gamepad will appear automatically. You can also toggle it with the emulator UI.</div>
-      </div>
-    </div>
+        // Load the EmulatorJS loader from CDN
+        const script = document.createElement('script');
+        script.src = window.EJS_pathtodata + 'loader.js';
+        document.body.appendChild(script);
 
-    <div class="section">
-      <div style="font-weight:700">Advanced</div>
-      <div style="display:flex;gap:8px;margin-top:8px">
-        <button id="dumpSaves" class="btn ghost">List cached saves</button>
-        <button id="clearCache" class="btn ghost">Clear cached files</button>
-      </div>
-    </div>
-  </div>
+        // Handle file uploads and start
+        document.getElementById('startEmulator').addEventListener('click', () => {
+            const romInput = document.getElementById('romFile');
+            const biosInput = document.getElementById('biosFile');
 
-  <!-- RIGHT: Game viewport -->
-  <div>
-    <div class="card">
-      <div style="position:relative;">
-        <div id="gameWrap">
-          <div class="betabadge">🤓 Beta build</div>
-          <div id="game"></div>
-          <!-- EmulatorJS will mount into #game -->
-        </div>
-      </div>
+            if (!romInput.files[0] || !biosInput.files[0]) {
+                alert('Upload both ROM and BIOS files to proceed.');
+                return;
+            }
 
-      <div class="meta">
-        <div class="info">
-          <div><strong id="gameTitle">—</strong></div>
-          <div class="muted" id="gameMeta">Core: gba • CDN: stable</div>
-        </div>
-        <div style="display:flex;gap:10px;align-items:center">
-          <div style="font-size:13px;color:var(--muted)">FPS: <span id="fps">—</span></div>
-          <div style="font-size:13px;color:var(--muted)">Status: <span id="runState">idle</span></div>
-        </div>
-      </div>
+            const romUrl = URL.createObjectURL(romInput.files[0]);
+            const biosUrl = URL.createObjectURL(biosInput.files[0]);
 
-      <div style="margin-top:12px" class="card">
-        <div style="font-weight:700;margin-bottom:8px">Save / State Activity</div>
-        <div class="save-list" id="activityLog">No save activity yet.</div>
-      </div>
+            window.EJS_gameUrl = romUrl;
+            window.EJS_biosUrl = biosUrl;
 
-    </div>
-
-    <footer>
-      Made by Cody • EmulatorJS CDN + mGBA core. Read the docs for advanced embed options and servers. (This page streams emulator binaries from the official CDN.) 
-    </footer>
-  </div>
-</div>
-
-<script>
-const CDN_BASE = 'https://cdn.emulatorjs.org/stable/data/';
-const LOADER_URL = CDN_BASE + 'loader.js';
-const dropzone = document.getElementById('dropzone');
-const romPicker = document.getElementById('romPicker');
-const statusEl = document.getElementById('status');
-const gameTitle = document.getElementById('gameTitle');
-const gameMeta = document.getElementById('gameMeta');
-const activityLog = document.getElementById('activityLog');
-const exportSaveBtn = document.getElementById('exportSaveBtn');
-const importSave = document.getElementById('importSave');
-const slotsContainer = document.getElementById('slots');
-const fpsEl = document.getElementById('fps');
-const runStateEl = document.getElementById('runState');
-const restartBtn = document.getElementById('restartBtn');
-const pauseBtn = document.getElementById('pauseBtn');
-const dumpSaves = document.getElementById('dumpSaves');
-const clearCache = document.getElementById('clearCache');
-const savePreview = document.getElementById('savePreview');
-
-let latestBatterySave = null;
-let saveStateSlots = new Array(10).fill(null);
-
-function logActivity(msg){
-  const time = new Date().toLocaleTimeString();
-  const el = document.createElement('div');
-  el.style.padding = '6px 4px';
-  el.style.borderBottom = '1px dashed rgba(255,255,255,0.02)';
-  el.textContent = `[${time}] ${msg}`;
-  if(activityLog.firstChild && activityLog.firstChild.textContent === 'No save activity yet.') activityLog.textContent = '';
-  activityLog.prepend(el);
-}
-
-function setStatus(s){ statusEl.textContent = s; }
-
-function renderSlots(){
-  slotsContainer.innerHTML = '';
-  for(let i=0;i<10;i++){
-    const s = document.createElement('div');
-    s.className='slot';
-    s.innerHTML = `
-      <div class="title">Slot ${i}</div>
-      <div style="margin-top:8px">
-        <button data-slot="${i}" class="btn ghost btn-save">Download</button>
-        <button data-slot="${i}" class="btn ghost btn-load">Upload</button>
-      </div>`;
-    slotsContainer.appendChild(s);
-  }
-}
-renderSlots();
-
-slotsContainer.addEventListener('click', e=>{
-  const saveBtn = e.target.closest('.btn-save');
-  const loadBtn = e.target.closest('.btn-load');
-
-  if(saveBtn){
-    const slot = Number(saveBtn.dataset.slot);
-    if(!saveStateSlots[slot]) { alert('No save state in that slot.'); return; }
-    const blob = new Blob([saveStateSlots[slot].data], {type:'application/octet-stream'});
-    const a = document.createElement('a');
-    a.href = URL.createObjectURL(blob);
-    a.download = saveStateSlots[slot].name || `save-state-slot-${slot}.state`;
-    a.click();
-    URL.revokeObjectURL(a.href);
-    logActivity(`Downloaded save-state from slot ${slot}`);
-  }
-
-  if(loadBtn){
-    const slot = Number(loadBtn.dataset.slot);
-    const inp = document.createElement('input');
-    inp.type = 'file';
-    inp.accept = '.state';
-    inp.onchange = ()=> {
-      const f = inp.files[0];
-      const reader = new FileReader();
-      reader.onload = ()=> {
-        const buf = new Uint8Array(reader.result);
-        if(window.EJS_module && typeof window.EJS_module.loadStateFromBuffer === 'function'){
-          try {
-            window.EJS_module.loadStateFromBuffer(buf);
-            logActivity(`Loaded save-state into emulator from file ${f.name}`);
-          } catch(err){
-            console.warn(err);
-            alert('State load failed programmatically. Drag .state file to game viewport.');
-          }
-        } else {
-          alert('State load API not available. Drag .state file to game viewport.');
-        }
-      };
-      reader.readAsArrayBuffer(f);
-    };
-    inp.click();
-  }
-});
-
-// Battery save export/import
-exportSaveBtn.addEventListener('click', ()=>{
-  if(!latestBatterySave){ alert('No battery save yet.'); return; }
-  const blob = new Blob([latestBatterySave.save], {type:'application/octet-stream'});
-  const a = document.createElement('a');
-  a.href = URL.createObjectURL(blob);
-  a.download = latestBatterySave.name || 'game_save.sav';
-  a.click();
-  URL.revokeObjectURL(a.href);
-  logActivity('Exported battery save (.sav)');
-});
-
-importSave.addEventListener('change', e=>{
-  const f = e.target.files[0];
-  if(!f) return;
-  const reader = new FileReader();
-  reader.onload = async ()=>{
-    const buf = new Uint8Array(reader.result);
-    if(window.EJS_module && typeof window.EJS_module.writeSaveFiles === 'function'){
-      try{
-        await window.EJS_module.writeSaveFiles([{name: f.name, data: buf}]);
-        logActivity(`Imported battery save: ${f.name}`);
-        alert('Imported save. Restart game if needed.');
-      } catch(err){
-        console.warn(err);
-        alert('Import failed via API. Drag .sav onto game viewport.');
-      }
-    } else {
-      alert('API unavailable. Drag .sav file to game viewport.');
-    }
-  };
-  reader.readAsArrayBuffer(f);
-});
-
-// ROM load
-dropzone.addEventListener('click', ()=> romPicker.click());
-romPicker.addEventListener('change', ()=> handleFiles(romPicker.files));
-['dragenter','dragover'].forEach(ev=> dropzone.addEventListener(ev,e=>{ e.preventDefault(); dropzone.style.borderColor='rgba(255,255,255,0.12)'; }));
-['dragleave','drop'].forEach(ev=> dropzone.addEventListener(ev,e=>{ e.preventDefault(); dropzone.style.borderColor='rgba(255,255,255,0.04)'; }));
-dropzone.addEventListener('drop', e=> handleFiles(e.dataTransfer.files));
-
-function handleFiles(files){
-  if(!files || files.length === 0) return;
-  const file = files[0];
-  const ext = file.name.split('.').pop().toLowerCase();
-  if(!['gba','zip','gm','bin'].includes(ext)) {
-    if(!confirm('File does not look like a .gba ROM. Continue?')) return;
-  }
-  loadRomFile(file);
-}
-
-function loadRomFile(file){
-  setStatus('Preparing ROM…');
-  if(window.EJS_terminate){ try{ window.EJS_terminate(); } catch(e){console.warn(e);} }
-  if(window._progba_lastRomURL){ try{ URL.revokeObjectURL(window._progba_lastRomURL);}catch(e){} }
-  const romUrl = URL.createObjectURL(file);
-  window._progba_lastRomURL = romUrl;
-  window.EJS_player='#game';
-  window.EJS_core='gba';
-  window.EJS_gameUrl=romUrl;
-  window.EJS_pathtodata=CDN_BASE;
-  window.EJS_startOnLoaded=true;
-  window.EJS_color='#ff6b6b';
-
-  window.EJS_ready = function(){
-    setStatus('Emulator ready — playing');
-    gameTitle.textContent = file.name;
-    gameMeta.textContent = `Core: gba • file: ${file.name}`;
-    runStateEl.textContent='running';
-    logActivity(`Game started: ${file.name}`);
-  };
-
-  window.EJS_onSaveUpdate = function(payload){
-    latestBatterySave = { 
-      hash: payload.hash, 
-      save: payload.save instanceof Uint8Array ? payload.save : new Uint8Array(payload.save), 
-      screenshot: payload.screenshot, 
-      format: payload.format, 
-      name: file.name.replace(/\.[^/.]+$/,'')+'.sav' 
-    };
-    savePreview.innerHTML = `<div style="display:flex;gap:8px;align-items:center">
-      <div style="width:48px;height:48px;background:url(${payload.screenshot}) center/cover;border-radius:6px"></div>
-      <div><div style="font-weight:700">${latestBatterySave.name}</div><div class="muted small">Hash: ${payload.hash}</div></div>
-    </div>`;
-    logActivity('Detected battery save update — export available.');
-  };
-
-  window.EJS_onSaveState = function(arr){
-    try{
-      const screenshot=arr[0], saveBuf=arr[1];
-      const slotIndex = saveStateSlots.findIndex(s=>!s); const idx = slotIndex===-1?0:slotIndex;
-      saveStateSlots[idx]={data: saveBuf instanceof Uint8Array ? saveBuf : new Uint8Array(saveBuf), name: `${file.name.replace(/\.[^/.]+$/,'')}_slot${idx}.state`, when: Date.now()};
-      logActivity(`Save-state created (slot ${idx})`);
-    } catch(e){ console.warn(e); }
-  };
-
-  const s=document.createElement('script');
-  s.src=LOADER_URL+'?_='+Date.now();
-  s.onload=()=>{ setStatus('ROM loaded; emulator initializing…'); };
-  s.onerror=e=>{ setStatus('Failed to load emulator core.'); alert('Check console.'); console.error(e); };
-  document.body.appendChild(s);
-}
-
-restartBtn.addEventListener('click', ()=>{
-  if(window.EJS_terminate){ try{ window.EJS_terminate(); setStatus('Restarting…'); setTimeout(()=> { if(window._progba_lastRomURL){ loadRomFile({name: gameTitle.textContent, url: window._progba_lastRomURL}); logActivity('Restart requested'); } },200); }catch(e){alert('Restart failed');} }
-});
-
-pauseBtn.addEventListener('click', ()=>{
-  if(window.EJS_module && typeof window.EJS_module.pause==='function'){ try{ window.EJS_module.pause(); runStateEl.textContent='paused'; setStatus('Paused'); }catch(e){alert('Pause failed');} } else { alert('Pause API unavailable'); }
-});
-
-dumpSaves.addEventListener('click', async ()=>{
-  try{
-    if(window.EJS_module && typeof window.EJS_module.readSaveFiles==='function'){
-      const files = await window.EJS_module.readSaveFiles();
-      alert('Save files:\n'+files.map(f=>f.name+' ('+(f.data?f.data.byteLength:'0')+' bytes)').join('\n'));
-    } else alert('API unavailable.');
-  } catch(e){ alert('Error reading saves: '+e.message); }
-});
-
-clearCache.addEventListener('click', ()=>{
-  if(confirm('Clear emulator cache & local saves?')){
-    if(window.EJS_module && typeof window.EJS_module.clearCache==='function'){
-      window.EJS_module.clearCache().then(()=> alert('Cache cleared. Reload page.'), ()=> alert('Failed to clear.'));
-    } else alert('API not available. Clear manually.');
-  }
-});
-
-setInterval(()=>{
-  if(window.EJS_module && typeof window.EJS_module.getFPS==='function'){
-    try{ fpsEl.textContent=Math.round(window.EJS_module.getFPS()); } catch(e){}
-  }
-},1000);
-
-window.addEventListener('keydown', e=>{
-  if(e.key==='F5'){ e.preventDefault(); if(window.EJS_module && typeof window.EJS_module.quickSave==='function'){ try{ window.EJS_module.quickSave(); logActivity('Quick save triggered'); return; }catch{} } document.dispatchEvent(new KeyboardEvent('keydown',{key:'F5',bubbles:true,cancelable:true})); logActivity('Quick save dispatched'); }
-  if(e.key==='F8'){ e.preventDefault(); if(window.EJS_module && typeof window.EJS_module.quickLoad==='function'){ try{ window.EJS_module.quickLoad(); logActivity('Quick load triggered'); return; }catch{} } document.dispatchEvent(new KeyboardEvent('keydown',{key:'F8',bubbles:true,cancelable:true})); logActivity('Quick load dispatched'); }
-});
-
-logActivity('Ready. Drop a Pokémon GBA ROM to start.');
-setStatus('Awaiting ROM…');
-</script>
-
+            // EmulatorJS will auto-start once configured
+        });
+    </script>
 </body>
 </html>
