@@ -1,0 +1,553 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>CodyPlay — GBA PWA</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='18' fill='%237c5cff'/%3E%3Ctext x='50' y='57' font-size='48' text-anchor='middle' fill='white' font-family='Arial,Helvetica,sans-serif'%3EC%3C/text%3E%3C/svg%3E" />
+<style>
+  :root{--bg:#071026;--panel:#0b1220;--muted:#9aa4b2;--accent:#7c5cff;--glass: rgba(255,255,255,0.03);}
+  html,body{height:100%;margin:0;font-family:Inter,system-ui,Segoe UI,Roboto,Arial;}
+  body{background:linear-gradient(180deg,#041021 0%, #071023 60%); color:#e6eef8; display:flex; align-items:center; justify-content:center; padding:20px; box-sizing:border-box;}
+  .container{width:1100px; max-width:100%; display:grid; grid-template-columns:1fr 380px; gap:20px; align-items:start;}
+  header{grid-column:1/-1; display:flex; justify-content:space-between; align-items:center;}
+  h1{font-size:20px;margin:0;}
+  .sub{font-size:12px;color:var(--muted);}
+  .panel{background:var(--panel); border-radius:12px; padding:14px; box-shadow:0 6px 30px rgba(10,12,20,0.6); border:1px solid rgba(255,255,255,0.03);}
+  #gameWrap{width:100%; aspect-ratio:16/9; background:linear-gradient(180deg,#061229,#031027); border-radius:10px; display:flex; align-items:center; justify-content:center; overflow:hidden; position:relative;}
+  #game{width:100%; height:100%; display:block;}
+  .dropHint{position:absolute; inset:0; display:flex; align-items:center; justify-content:center; pointer-events:none; color:rgba(255,255,255,0.06); font-weight:600; letter-spacing:1px;}
+  .controlsRow{display:flex; gap:8px; margin-top:12px; align-items:center; flex-wrap:wrap;}
+  button{background:var(--glass); border:1px solid rgba(255,255,255,0.04); padding:8px 10px; color:inherit; border-radius:8px; cursor:pointer; font-weight:600;}
+  input[type=file]{display:none;}
+  .rightCol{display:flex; flex-direction:column; gap:12px;}
+  .group{background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01)); border-radius:10px; padding:12px; border:1px solid rgba(255,255,255,0.02);}
+  label.small{font-size:12px;color:var(--muted); display:block;margin-bottom:6px;}
+  .row{display:flex; gap:8px; align-items:center;}
+  .range{width:100%;}
+  .info{font-size:13px;color:var(--muted); margin-top:6px;}
+  .buttonsGrid{display:grid; grid-template-columns:repeat(3,1fr); gap:8px;}
+  .kbd{background:#071026;padding:6px;border-radius:6px;border:1px solid rgba(255,255,255,0.03);font-size:13px; text-align:center;}
+  footer{grid-column:1/-1; font-size:12px; color:var(--muted); margin-top:8px;}
+  .onScreenPad{display:grid; grid-template-columns:repeat(3,1fr); gap:8px; padding:8px;}
+  .padBtn{padding:12px; border-radius:10px; background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01)); border:1px solid rgba(255,255,255,0.03); font-weight:700;}
+  small.muted{color:var(--muted); display:block; margin-top:6px;}
+  .installRow{display:flex; gap:8px; align-items:center;}
+  .status{font-size:13px;color:var(--muted); min-height:18px;}
+  @media (max-width:1000px){ .container{grid-template-columns:1fr;} .rightCol{order:2} header{flex-direction:column;align-items:flex-start} }
+</style>
+</head>
+<body>
+<div class="container">
+  <header>
+    <div>
+      <h1>CodyPlay — GBA PWA</h1>
+      <div class="sub">Installable single-file GBA emulator for Cody — created by Maple.</div>
+    </div>
+    <div style="text-align:right;">
+      <div class="sub">Single-file PWA • Uses EmulatorJS CDN</div>
+      <div class="sub" id="versionBadge">CDN: latest</div>
+    </div>
+  </header>
+
+  <!-- Main Emulator Panel -->
+  <section class="panel">
+    <div id="gameWrap">
+      <div id="game"></div>
+      <div class="dropHint" id="dropHint">Drag & drop a .gba ROM here or use Load ROM</div>
+    </div>
+
+    <div class="controlsRow">
+      <div style="display:flex; gap:8px; align-items:center; flex-wrap:wrap;">
+        <input id="romFile" type="file" accept=".gba,.bin,.zip" />
+        <button id="btnLoadRom">Browse ROM</button>
+        <input id="romUrl" placeholder="OR paste ROM URL (https://... .gba)" style="padding:8px;border-radius:8px;border:1px solid rgba(255,255,255,0.03);background:transparent;color:inherit;width:360px" />
+        <button id="btnLoadUrl">Load URL</button>
+      </div>
+
+      <div style="margin-left:auto; display:flex; gap:8px;">
+        <button id="btnPause">Pause</button>
+        <button id="btnReset">Reset</button>
+        <button id="btnScreenshot">Screenshot</button>
+      </div>
+    </div>
+
+    <div style="display:flex; gap:12px; margin-top:12px; align-items:flex-start; flex-wrap:wrap;">
+      <div style="flex:1;">
+        <div class="group">
+          <label class="small">Save / Load Game Files</label>
+          <div style="display:flex; gap:8px; align-items:center;">
+            <button id="btnDownloadSave">Download .sav</button>
+            <label for="loadSaveFile" style="cursor:pointer"><button id="btnLoadSave">Upload .sav</button></label>
+            <input id="loadSaveFile" type="file" accept=".sav,.battery,.bin" />
+            <button id="btnClearSaves">Clear Cached Saves</button>
+          </div>
+          <div class="info">Native save (.sav) support + save-states. Use Quick Save/Load for fast slots.</div>
+        </div>
+
+        <div class="group" style="margin-top:12px;">
+          <label class="small">Save States</label>
+          <div class="row" style="gap:10px;">
+            <button id="btnSaveState">Save State (download)</button>
+            <label for="loadStateFile" style="cursor:pointer"><button id="btnLoadState">Load State (upload)</button></label>
+            <input id="loadStateFile" type="file" accept=".state,.bin,.sav" />
+            <button id="btnQuickSave">Quick Save</button>
+            <button id="btnQuickLoad">Quick Load</button>
+          </div>
+          <small class="muted">Quick saves stored in browser localStorage.</small>
+        </div>
+      </div>
+
+      <aside class="rightCol">
+        <div class="group">
+          <label class="small">Audio & Speed</label>
+          <div class="row">
+            <div style="width:120px;">Volume</div>
+            <input id="volume" class="range" type="range" min="0" max="1" step="0.01" value="0.6" />
+          </div>
+          <div style="height:8px"></div>
+          <div class="row">
+            <div style="width:120px;">Speed</div>
+            <input id="speed" class="range" type="range" min="0.25" max="2" step="0.05" value="1" />
+          </div>
+          <div class="info">Adjust volume & emulation speed (if supported by the core).</div>
+        </div>
+
+        <div class="group">
+          <label class="small">On-Screen Controls</label>
+          <div class="onScreenPad">
+            <button class="padBtn" data-pad="up">↑</button>
+            <button class="padBtn" data-pad="start">Start</button>
+            <button class="padBtn" data-pad="select">Select</button>
+
+            <button class="padBtn" data-pad="left">←</button>
+            <button class="padBtn" data-pad="a">A</button>
+            <button class="padBtn" data-pad="right">→</button>
+
+            <div></div>
+            <button class="padBtn" data-pad="b">B</button>
+            <div></div>
+
+            <div class="info" style="grid-column:1/-1">Keyboard: Arrow keys = D-Pad, Z = A, X = B, Enter = Start, Shift = Select</div>
+          </div>
+        </div>
+
+        <div class="group">
+          <label class="small">Install / Status</label>
+          <div class="installRow">
+            <button id="btnInstall" title="Install CodyPlay to your device">Install</button>
+            <button id="btnOpenSWLog">SW Log</button>
+          </div>
+          <div class="status" id="status">Ready. Maple says hi 👋</div>
+        </div>
+      </aside>
+    </div>
+  </section>
+
+  <section class="panel">
+    <div class="group">
+      <label class="small">Controls Quick Reference</label>
+      <div class="buttonsGrid" style="margin-top:8px;">
+        <div class="kbd">D-Pad: Arrow keys</div>
+        <div class="kbd">A: Z</div>
+        <div class="kbd">B: X</div>
+        <div class="kbd">Start: Enter</div>
+        <div class="kbd">Select: Shift</div>
+        <div class="kbd">Pause: P</div>
+      </div>
+      <small class="muted">Tip: click the game area to focus keyboard input.</small>
+    </div>
+
+    <div class="group" style="margin-top:12px;">
+      <label class="small">Notes</label>
+      <div class="info">This is a single-file PWA wrapper around EmulatorJS (CDN). Installer and service worker are generated at runtime from this single file. Some CDN resources may not be cacheable due to cross-origin policy.</div>
+    </div>
+  </section>
+
+  <footer>Built for Cody — by Maple. Made single-file so it's easy to install.</footer>
+</div>
+
+<!-- EmulatorJS config for the embedded loader -->
+<script>
+  // Basic global config that EmulatorJS loader reads
+  EJS_player = '#game';
+  EJS_core = 'gba';
+  EJS_volume = 0.6;
+  EJS_showControls = true;
+  EJS_gameName = 'CodyPlay_GBA';
+  EJS_pathtodata = 'https://cdn.emulatorjs.org/latest/data/';
+</script>
+
+<!-- EmulatorJS loader (CDN) -->
+<script src="https://cdn.emulatorjs.org/latest/data/loader.js"></script>
+
+<script>
+/* ============================
+   PWA Single-file setup
+   - Creates manifest blob and links it
+   - Creates service worker blob and tries to register it
+   - Handles install prompt and UI
+   ============================ */
+
+(function(){
+  const statusEl = id('status');
+
+  // --- tiny helpers ---
+  function id(n){ return document.getElementById(n); }
+  function info(m, persist=false){ console.log('[CodyPlay]', m); statusEl.textContent = m; if(!persist) setTimeout(()=>{ if(statusEl.textContent===m) statusEl.textContent='Ready.'; },3500); }
+
+  // --- Manifest (generated as blob so we remain single-file) ---
+  const manifest = {
+    name: "CodyPlay — GBA",
+    short_name: "CodyPlay",
+    description: "Single-file PWA GBA emulator for Cody. Save-states, screenshots, and on-screen controls.",
+    start_url: ".",
+    display: "standalone",
+    background_color: "#071026",
+    theme_color: "#7c5cff",
+    icons: [
+      {
+        src: "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='18' fill='%237c5cff'/%3E%3Ctext x='50' y='57' font-size='48' text-anchor='middle' fill='white' font-family='Arial,Helvetica,sans-serif'%3EC%3C/text%3E%3C/svg%3E",
+        sizes: "100x100",
+        type: "image/svg+xml"
+      }
+    ]
+  };
+  const manifestBlob = new Blob([JSON.stringify(manifest)], {type:'application/json'});
+  const manifestURL = URL.createObjectURL(manifestBlob);
+  const existingManifest = document.querySelector('link[rel="manifest"]');
+  if (existingManifest) existingManifest.href = manifestURL;
+  else {
+    const l = document.createElement('link');
+    l.rel = 'manifest';
+    l.href = manifestURL;
+    document.head.appendChild(l);
+  }
+
+  // --- Service worker source as a string ---
+  const swSource = `// CodyPlay PWA Service Worker (generated inline)
+  const CACHE_NAME = 'codyplay-shell-v1';
+  const APP_SHELL = [
+    '/', // may be helpful in some contexts
+    // prefer caching the current document
+    location.pathname,
+    // attempt to cache the emulator CDN base (may fail if CORS blocks)
+    'https://cdn.emulatorjs.org/latest/data/loader.js'
+  ];
+
+  self.addEventListener('install', (ev) => {
+    ev.waitUntil((async () => {
+      try{
+        const cache = await caches.open(CACHE_NAME);
+        await cache.addAll(APP_SHELL);
+        // keep the SW installed
+        await self.skipWaiting();
+      }catch(e){
+        // caching may fail due to cross-origin or network errors; still proceed
+        console.warn('CodyPlay SW install/caching issue', e);
+      }
+    })());
+  });
+
+  self.addEventListener('activate', (ev) => {
+    ev.waitUntil((async () => {
+      // cleanup old caches if any
+      const keys = await caches.keys();
+      await Promise.all(keys.map(k => { if (k !== CACHE_NAME) return caches.delete(k); }));
+      await self.clients.claim();
+    })());
+  });
+
+  self.addEventListener('fetch', (ev) => {
+    // Try network first for emulator CDN (to ensure fetchable cores), else fallback to cache
+    const url = new URL(ev.request.url);
+    // For navigation requests, try cache then network
+    if (ev.request.mode === 'navigate') {
+      ev.respondWith((async () => {
+        try {
+          const networkResp = await fetch(ev.request);
+          return networkResp;
+        } catch (e) {
+          const cache = await caches.open(CACHE_NAME);
+          const cached = await cache.match(location.pathname) || await cache.match('/');
+          if (cached) return cached;
+          return new Response('<meta name="viewport" content="width=device-width,initial-scale=1"/><h1>Offline</h1><p>CodyPlay is offline and the requested page is not cached.</p>', {headers:{'Content-Type':'text/html'}});
+        }
+      })());
+      return;
+    }
+
+    // For other requests, try cache first then network
+    ev.respondWith((async () => {
+      const cache = await caches.open(CACHE_NAME);
+      const cached = await cache.match(ev.request);
+      if (cached) return cached;
+      try{
+        const response = await fetch(ev.request);
+        // option: store same-origin responses in cache
+        if (response && response.ok && response.type === 'basic') cache.put(ev.request, response.clone());
+        return response;
+      }catch(e){
+        return cached || new Response('', {status:503, statusText:'Service Unavailable'});
+      }
+    })());
+  });`;
+
+  // Create SW blob & register it
+  (async function registerSW(){
+    if (!('serviceWorker' in navigator)) { info('Service Worker not supported in this browser.'); return; }
+    try{
+      const swBlob = new Blob([swSource], {type:'application/javascript'});
+      const swUrl = URL.createObjectURL(swBlob);
+      const reg = await navigator.serviceWorker.register(swUrl, {scope: './'});
+      info('Service worker registered (scope: ' + reg.scope + ').', true);
+      // revoke object URL after a small delay (registration retains a copy)
+      setTimeout(()=> URL.revokeObjectURL(swUrl), 2000);
+    }catch(err){
+      console.warn('SW registration failed:', err);
+      info('Service worker registration failed (see console).');
+    }
+  })();
+
+  /* -----------------------
+     Install prompt handling
+     ----------------------- */
+  let deferredPrompt = null;
+  window.addEventListener('beforeinstallprompt', (e) => {
+    e.preventDefault();
+    deferredPrompt = e;
+    info('App install available — press Install to add to your device.');
+    // show the custom install button
+    const btn = id('btnInstall');
+    btn.style.display = 'inline-block';
+  });
+
+  id('btnInstall').addEventListener('click', async ()=>{
+    const btn = id('btnInstall');
+    if (deferredPrompt) {
+      deferredPrompt.prompt();
+      const choice = await deferredPrompt.userChoice;
+      if (choice.outcome === 'accepted') info('Thanks — CodyPlay installed!'); else info('Install dismissed.');
+      deferredPrompt = null;
+      return;
+    }
+    // Try the browser-led flow (some browsers show UI automatically)
+    info('If the browser supports installation, use the browser UI (⋮ -> Install).');
+  });
+
+  id('btnOpenSWLog').addEventListener('click', async ()=>{
+    try{
+      const regs = await navigator.serviceWorker.getRegistrations();
+      console.log('ServiceWorker registrations:', regs);
+      info('Service worker registrations logged to console.');
+    }catch(e){ console.warn(e); info('Could not list service worker registrations.'); }
+  });
+
+  info('PWA manifest + service worker initialized.');
+})();
+</script>
+
+<!-- =========================
+     Emulator UI & features
+     (Mostly same as earlier — save states, .sav upload, screenshot, keyboard mapping)
+     ========================= -->
+<script>
+  (function(){
+    const status = document.getElementById('status');
+    function info(m, persist=false){ console.log('[CodyPlay]', m); status.textContent = m; if(!persist) setTimeout(()=>{ if(status.textContent===m) status.textContent='Ready.'; },3500); }
+
+    // Elements
+    const romFile = document.getElementById('romFile');
+    const btnLoadRom = document.getElementById('btnLoadRom');
+    const btnLoadUrl = document.getElementById('btnLoadUrl');
+    const romUrlInput = document.getElementById('romUrl');
+    const gameWrap = document.getElementById('gameWrap');
+    const dropHint = document.getElementById('dropHint');
+    const btnPause = document.getElementById('btnPause');
+    const btnReset = document.getElementById('btnReset');
+    const btnScreenshot = document.getElementById('btnScreenshot');
+
+    // Save/load elements
+    const btnDownloadSave = document.getElementById('btnDownloadSave');
+    const loadSaveFile = document.getElementById('loadSaveFile');
+    const btnClearSaves = document.getElementById('btnClearSaves');
+
+    const btnSaveState = document.getElementById('btnSaveState');
+    const btnLoadState = document.getElementById('btnLoadState');
+    const loadStateFile = document.getElementById('loadStateFile');
+    const btnQuickSave = document.getElementById('btnQuickSave');
+    const btnQuickLoad = document.getElementById('btnQuickLoad');
+
+    const vol = document.getElementById('volume');
+    const speed = document.getElementById('speed');
+
+    btnLoadRom.addEventListener('click', ()=> romFile.click());
+    romFile.addEventListener('change', async (ev)=>{
+      const f = ev.target.files[0];
+      if (!f) return;
+      const url = URL.createObjectURL(f);
+      EJS_gameUrl = url;
+      EJS_gameName = f.name.replace(/\.[^.]+$/, '');
+      info('Loading ROM: ' + f.name);
+      if (window.EJS_emulator && window.EJS_emulator.loadGame) {
+        try{ await window.EJS_emulator.loadGame({url}); info('Game loaded'); } catch(e){ console.warn(e); info('Auto-load failed; emulator UI may let you load.'); }
+      } else info('ROM assigned — open the EmulatorJS menu if it did not auto-start.');
+    });
+
+    btnLoadUrl.addEventListener('click', async ()=>{
+      const val = romUrlInput.value.trim();
+      if (!val) return info('Paste a ROM URL first.');
+      EJS_gameUrl = val;
+      EJS_gameName = val.split('/').pop() || 'CodyPlay_GBA';
+      info('Attempting load from URL...');
+      try{ if (window.EJS_emulator && window.EJS_emulator.loadGame){ await window.EJS_emulator.loadGame({url: val}); info('Game loaded from URL.'); } else info('URL set — use emulator menu if not auto-loaded.'); }
+      catch(err){ console.warn(err); info('Load failed: ' + (err.message||err)); }
+    });
+
+    // Drag & drop
+    ['dragenter','dragover'].forEach(e => gameWrap.addEventListener(e, (ev)=>{ ev.preventDefault(); gameWrap.style.boxShadow='inset 0 0 0 2000px rgba(0,0,0,0.15)'; dropHint.style.color='rgba(255,255,255,0.18)'; }));
+    ['dragleave','drop'].forEach(e => gameWrap.addEventListener(e, (ev)=>{ ev.preventDefault(); gameWrap.style.boxShadow='none'; dropHint.style.color='rgba(255,255,255,0.06)'; }));
+    gameWrap.addEventListener('drop', (ev)=>{
+      const f = ev.dataTransfer.files && ev.dataTransfer.files[0];
+      if (!f) return;
+      romFile.files = ev.dataTransfer.files;
+      romFile.dispatchEvent(new Event('change'));
+    });
+
+    // Pause/Reset/Screenshot
+    btnPause.addEventListener('click', ()=>{
+      if (window.EJS_emulator && window.EJS_emulator.pause) { window.EJS_emulator.pause(); info('Paused'); return; }
+      info('Pause requested (if unsupported, console may show API missing).');
+    });
+    btnReset.addEventListener('click', ()=>{ if (window.EJS_emulator && window.EJS_emulator.reset){ window.EJS_emulator.reset(); info('Reset'); } else info('Reset requested.'); });
+    btnScreenshot.addEventListener('click', ()=>{
+      const c = document.querySelector('#game canvas');
+      if (!c){ info('No canvas to screenshot.'); return; }
+      c.toBlob((blob)=>{ const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download = (EJS_gameName||'CodyPlay') + '_screenshot_' + new Date().toISOString().replace(/[:.]/g,'-') + '.png'; document.body.appendChild(a); a.click(); a.remove(); setTimeout(()=>URL.revokeObjectURL(a.href),10000); info('Screenshot saved.'); });
+    });
+
+    // Save file download
+    btnDownloadSave.addEventListener('click', ()=>{
+      try{
+        if (window.EJS_emulator && window.EJS_emulator.saveManager && window.EJS_emulator.saveManager.getSaveFile){
+          const saveBuf = window.EJS_emulator.saveManager.getSaveFile();
+          if (!saveBuf){ info('No in-game save detected.'); return; }
+          const blob = new Blob([saveBuf], {type:'application/octet-stream'});
+          const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = (EJS_gameName||'game') + '.sav'; document.body.appendChild(a); a.click(); a.remove(); setTimeout(()=>URL.revokeObjectURL(a.href),10000);
+          info('Downloaded .sav');
+          return;
+        }
+        info('Save export not supported in this emulator build.');
+      }catch(e){ console.warn(e); info('Error exporting save.'); }
+    });
+
+    loadSaveFile.addEventListener('change', (ev)=>{
+      const f = ev.target.files[0];
+      if (!f) return;
+      const reader = new FileReader();
+      reader.onload = function(){
+        try{
+          const buf = new Uint8Array(reader.result);
+          if (window.EJS_emulator && window.EJS_emulator.saveManager && window.EJS_emulator.saveManager.setSaveFile){ window.EJS_emulator.saveManager.setSaveFile(buf); info('.sav applied.'); }
+          else info('.sav uploaded but emulator API not available to auto-apply.');
+        }catch(err){ console.error(err); info('Failed to apply .sav: ' + err.message); }
+      };
+      reader.readAsArrayBuffer(f);
+    });
+
+    btnClearSaves.addEventListener('click', ()=>{
+      try{ if (window.EJS_emulator && window.EJS_emulator.clearCache){ window.EJS_emulator.clearCache(); info('Emulator cache cleared.'); return; } Object.keys(localStorage).forEach(k=>{ if(k.toLowerCase().includes('emulator')||k.includes('cody_quick')) localStorage.removeItem(k); }); info('Attempted to clear saves from localStorage.'); }catch(e){ console.warn(e); info('Clear caches failed.'); }
+    });
+
+    // Save states
+    btnSaveState.addEventListener('click', async ()=>{
+      try{
+        if (window.EJS_emulator && window.EJS_emulator.gameManager && window.EJS_emulator.gameManager.getState){
+          const state = window.EJS_emulator.gameManager.getState();
+          const blob = new Blob([state], {type:'application/octet-stream'});
+          const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = (EJS_gameName||'game') + '_savestate_' + new Date().toISOString().replace(/[:.]/g,'-') + '.state'; document.body.appendChild(a); a.click(); a.remove(); setTimeout(()=>URL.revokeObjectURL(a.href),10000);
+          info('Save state downloaded.');
+        } else info('Save state API not available.');
+      }catch(e){ console.warn(e); info('Save state failed.'); }
+    });
+
+    loadStateFile.addEventListener('change', (ev)=>{
+      const f = ev.target.files[0];
+      if (!f) return;
+      const reader = new FileReader();
+      reader.onload = function(){
+        try{
+          const arr = new Uint8Array(reader.result);
+          if (window.EJS_emulator && window.EJS_emulator.gameManager && window.EJS_emulator.gameManager.setState){ window.EJS_emulator.gameManager.setState(arr); info('State loaded.'); } else info('Cannot apply state; API missing.');
+        }catch(err){ console.error(err); info('Failed to load state: ' + err.message); }
+      };
+      reader.readAsArrayBuffer(f);
+    });
+
+    btnQuickSave.addEventListener('click', ()=>{
+      try{
+        if (window.EJS_emulator && window.EJS_emulator.gameManager && window.EJS_emulator.gameManager.getState){
+          const state = window.EJS_emulator.gameManager.getState();
+          localStorage.setItem('cody_quick_save', JSON.stringify(Array.from(state)));
+          info('Quick save stored.');
+        } else info('Quick save not supported on this build.');
+      }catch(e){ console.warn(e); info('Quick save failed.'); }
+    });
+
+    btnQuickLoad.addEventListener('click', ()=>{
+      try{
+        const raw = localStorage.getItem('cody_quick_save');
+        if (!raw){ info('No quick save found.'); return; }
+        const arr = new Uint8Array(JSON.parse(raw));
+        if (window.EJS_emulator && window.EJS_emulator.gameManager && window.EJS_emulator.gameManager.setState){ window.EJS_emulator.gameManager.setState(arr); info('Quick save loaded.'); } else info('Cannot apply quick save; API missing.');
+      }catch(e){ console.warn(e); info('Quick load failed.'); }
+    });
+
+    // On-screen pad mapping
+    document.querySelectorAll('.padBtn').forEach(btn=>{
+      btn.addEventListener('mousedown', ()=> mapPadToKey(btn.dataset.pad, true));
+      btn.addEventListener('mouseup', ()=> mapPadToKey(btn.dataset.pad, false));
+      btn.addEventListener('touchstart', (ev)=>{ ev.preventDefault(); mapPadToKey(btn.dataset.pad, true); });
+      btn.addEventListener('touchend', (ev)=>{ ev.preventDefault(); mapPadToKey(btn.dataset.pad, false); });
+    });
+
+    function sendKey(code, down=true){
+      const evType = down ? 'keydown' : 'keyup';
+      const ev = new KeyboardEvent(evType, {code:code, key: code, bubbles:true, cancelable:true});
+      window.dispatchEvent(ev);
+    }
+    function mapPadToKey(pad, down){
+      const map = { 'up':'ArrowUp','down':'ArrowDown','left':'ArrowLeft','right':'ArrowRight', 'a':'KeyZ','b':'KeyX','start':'Enter','select':'Shift' };
+      const code = map[pad];
+      if (code) sendKey(code, down);
+    }
+
+    window.addEventListener('keydown', (ev)=>{
+      if (ev.code === 'KeyP'){ ev.preventDefault(); if (window.EJS_emulator && window.EJS_emulator.pause) window.EJS_emulator.pause(); info('Toggle pause'); }
+    });
+
+    // Volume & speed
+    vol.addEventListener('input', ()=>{
+      if (window.EJS_emulator && typeof window.EJS_emulator.setVolume === 'function'){ window.EJS_emulator.setVolume(parseFloat(vol.value)); info('Volume set'); return; }
+      EJS_volume = parseFloat(vol.value);
+      info('Volume adjusted (may require reload)');
+    });
+    speed.addEventListener('input', ()=>{
+      if (window.EJS_emulator && typeof window.EJS_emulator.setSpeed === 'function'){ window.EJS_emulator.setSpeed(parseFloat(speed.value)); info('Speed set'); return; }
+      info('Speed change requested; may not be supported.');
+    });
+
+    // EmulatorJS lifecycle hooks (if available)
+    EJS_onGameStart = function(){
+      info('Game started.', true);
+      try{ if (window.EJS_emulator && window.EJS_emulator.version) document.getElementById('versionBadge').textContent = 'Engine v' + window.EJS_emulator.version; } catch(e){}
+    };
+    EJS_onSaveState = function(payload){ console.log('EJS_onSaveState', payload); info('Save state created by emulator.'); };
+    EJS_onLoadState = function(){ info('Emulator load state finished.'); };
+    EJS_onSaveUpdate = function(payload){ console.log('EJS_onSaveUpdate', payload); info('Game save updated.'); };
+
+    info('CodyPlay UI ready — load a ROM to start.');
+  })();
+</script>
+</body>
+</html>
