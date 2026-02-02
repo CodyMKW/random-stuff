@@ -1,10 +1,12 @@
 // ==UserScript==
 // @name         Smart Auto Click Panel
 // @namespace    mii-center-click
-// @version      3.1
+// @version      3.2
 // @match        https://miis.whatastupididea.com/*
 // @grant        GM_setValue
 // @grant        GM_getValue
+// @run-at       document-end
+// @inject-into  page
 // ==/UserScript==
 
 (function () {
@@ -86,18 +88,9 @@
     function fireClick(x, y) {
         var el = document.elementFromPoint(x, y);
         if (!el) return;
-
-        var down = document.createEvent("MouseEvents");
-        down.initMouseEvent("mousedown", true, true, window, 1, 0, 0, x, y, false, false, false, false, 0, null);
-        el.dispatchEvent(down);
-
-        var up = document.createEvent("MouseEvents");
-        up.initMouseEvent("mouseup", true, true, window, 1, 0, 0, x, y, false, false, false, false, 0, null);
-        el.dispatchEvent(up);
-
-        var click = document.createEvent("MouseEvents");
-        click.initMouseEvent("click", true, true, window, 1, 0, 0, x, y, false, false, false, false, 0, null);
-        el.dispatchEvent(click);
+        el.dispatchEvent(new MouseEvent("mousedown", {bubbles:true, clientX:x, clientY:y}));
+        el.dispatchEvent(new MouseEvent("mouseup", {bubbles:true, clientX:x, clientY:y}));
+        el.dispatchEvent(new MouseEvent("click", {bubbles:true, clientX:x, clientY:y}));
     }
 
     function startInterval() {
@@ -139,4 +132,3 @@
         }
     });
 })();
-
