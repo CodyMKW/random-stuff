@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Smart Auto Click Panel
 // @namespace    mii-center-click
-// @version      3.2
+// @version      4.0
 // @match        https://miis.whatastupididea.com/*
 // @grant        GM_setValue
 // @grant        GM_getValue
@@ -12,6 +12,7 @@
 (function () {
     var speeds = [5,10,20,50,75,100,150,200,300,500,1000];
     var savedSpeed = parseInt(GM_getValue("ac_speed", 100), 10);
+    var turbo = GM_getValue("ac_turbo", false);
     if (speeds.indexOf(savedSpeed) === -1) savedSpeed = 100;
 
     var panel = document.createElement("div");
@@ -42,7 +43,7 @@
 
     var speedSelect = document.createElement("select");
     speedSelect.style.width = "100%";
-    speedSelect.style.marginBottom = "8px";
+    speedSelect.style.marginBottom = "6px";
     speedSelect.style.padding = "4px";
     speedSelect.style.borderRadius = "6px";
     speedSelect.style.border = "none";
@@ -54,6 +55,20 @@
         if (speeds[i] === savedSpeed) opt.selected = true;
         speedSelect.appendChild(opt);
     }
+
+    var turboWrap = document.createElement("label");
+    turboWrap.style.display = "block";
+    turboWrap.style.fontSize = "12px";
+    turboWrap.style.marginBottom = "8px";
+    turboWrap.style.cursor = "pointer";
+
+    var turboBox = document.createElement("input");
+    turboBox.type = "checkbox";
+    turboBox.checked = turbo;
+    turboBox.style.marginRight = "6px";
+
+    turboWrap.appendChild(turboBox);
+    turboWrap.appendChild(document.createTextNode("Turbo Mode"));
 
     var button = document.createElement("button");
     button.textContent = "Start";
@@ -75,12 +90,14 @@
     panel.appendChild(title);
     panel.appendChild(speedLabel);
     panel.appendChild(speedSelect);
+    panel.appendChild(turboWrap);
     panel.appendChild(button);
     panel.appendChild(status);
     document.body.appendChild(panel);
 
     var clicking = false;
     var intervalId = null;
+    var rafId = null;
     var targetX = window.innerWidth / 2;
     var targetY = window.innerHeight / 2;
     var currentSpeed = savedSpeed;
@@ -93,10 +110,24 @@
         el.dispatchEvent(new MouseEvent("click", {bubbles:true, clientX:x, clientY:y}));
     }
 
-    function startInterval() {
-        intervalId = setInterval(function () {
-            fireClick(targetX, targetY);
-        }, currentSpeed);
+    function turboLoop() {
+        fireClick(targetX, targetY);
+        rafId = requestAnimationFrame(turboLoop);
+    }
+
+    function startClicking() {
+        if (turboBox.checked) {
+            turboLoop();
+        } else {
+            intervalId = setInterval(function () {
+                fireClick(targetX, targetY);
+            }, currentSpeed);
+        }
+    }
+
+    function stopClicking() {
+        clearInterval(intervalId);
+        cancelAnimationFrame(rafId);
     }
 
     function setTarget(e) {
@@ -104,15 +135,23 @@
         targetY = e.clientY;
         document.removeEventListener("click", setTarget, true);
         status.textContent = "Running";
-        startInterval();
+        startClicking();
     }
 
     speedSelect.addEventListener("change", function () {
         currentSpeed = parseInt(speedSelect.value, 10);
         GM_setValue("ac_speed", currentSpeed);
-        if (clicking) {
+        if (clicking && !turboBox.checked) {
             clearInterval(intervalId);
-            startInterval();
+            startClicking();
+        }
+    });
+
+    turboBox.addEventListener("change", function () {
+        GM_setValue("ac_turbo", turboBox.checked);
+        if (clicking) {
+            stopClicking();
+            startClicking();
         }
     });
 
@@ -125,7 +164,7 @@
             document.addEventListener("click", setTarget, true);
         } else {
             clicking = false;
-            clearInterval(intervalId);
+            stopClicking();
             button.textContent = "Start";
             button.style.background = "#2563eb";
             status.textContent = "Stopped";
